@@ -19,6 +19,7 @@ using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
 using Work_IA.Infrastructure.Persistence.Repositories;
 using Work_IA.Infrastructure.Services;
+using Work_IA.Domain.Agents;
 using Work_IA.Infrastructure.Memory;
 using Work_IA.Infrastructure.Workflows;
 using Work_IA.Infrastructure.Workspace;
@@ -46,6 +47,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.AddScoped<IWorkflowRepository, WorkflowRepository>();
+        services.AddScoped<ITokenUsageRepository, TokenUsageRepository>();
 
         services.AddSingleton<RoleDefinitionProvider>();
 

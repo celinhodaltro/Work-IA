@@ -1,40 +1,107 @@
 @page "/"
-@using MudBlazor
+@using Work_IA.BlazorDashboard.Services
+@inject AgentService AgentService
+@inject NavigationManager Navigation
 
-<MudText Typo="Typo.h4">AI Office OS Dashboard</MudText>
-<MudText Class="mb-6">Real-time agent coordination platform</MudText>
+<MudText Typo="Typo.h4">🏢 AI Office OS</MudText>
+<MudText Class="mb-6">Seu escritório de engenharia multi-agente</MudText>
 
 <MudGrid>
     <MudItem xs="12" sm="6" md="3">
         <MudCard Class="pa-4">
             <MudCardContent>
-                <MudText Typo="Typo.h3">9</MudText>
-                <MudText Typo="Typo.body2">Active Agents</MudText>
+                <MudText Typo="Typo.h3">@Agents.Count</MudText>
+                <MudText Typo="Typo.body2">Funcionários</MudText>
             </MudCardContent>
         </MudCard>
     </MudItem>
     <MudItem xs="12" sm="6" md="3">
         <MudCard Class="pa-4">
             <MudCardContent>
-                <MudText Typo="Typo.h3">42</MudText>
-                <MudText Typo="Typo.body2">Events Today</MudText>
+                <MudText Typo="Typo.h3">@OnlineCount</MudText>
+                <MudText Typo="Typo.body2">Online</MudText>
             </MudCardContent>
         </MudCard>
     </MudItem>
     <MudItem xs="12" sm="6" md="3">
         <MudCard Class="pa-4">
             <MudCardContent>
-                <MudText Typo="Typo.h3">7</MudText>
-                <MudText Typo="Typo.body2">Active Tasks</MudText>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
-    <MudItem xs="12" sm="6" md="3">
-        <MudCard Class="pa-4">
-            <MudCardContent>
-                <MudText Typo="Typo.h3">128</MudText>
-                <MudText Typo="Typo.body2">Memory Entries</MudText>
+                <MudText Typo="Typo.h3">@Agents.Sum(a => a.ExperiencePoints)</MudText>
+                <MudText Typo="Typo.body2">XP Total</MudText>
             </MudCardContent>
         </MudCard>
     </MudItem>
 </MudGrid>
+
+<MudText Typo="Typo.h5" Class="mt-6 mb-4">Equipe</MudText>
+
+<MudGrid>
+    @foreach (var agent in Agents)
+    {
+        <MudItem xs="12" sm="6" md="4" lg="3">
+            <MudCard Class="pa-4" Style="height: 200px">
+                <MudCardContent>
+                    <div class="d-flex align-center mb-2">
+                        <MudAvatar Color="@GetLevelColor(agent.CareerLevel)" Size="Size.Large">
+                            @agent.Name[0]
+                        </MudAvatar>
+                        <div class="ml-4">
+                            <MudText Typo="Typo.h6">@agent.Name</MudText>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">@agent.Title</MudText>
+                        </div>
+                    </div>
+                    <div class="d-flex align-center mt-4">
+                        <span class="agent-status-dot @GetStatusClass(agent.Status)"></span>
+                        <MudChip Size="Size.Small" Color="@GetStatusColor(agent.Status)" Class="ml-2">
+                            @agent.Status
+                        </MudChip>
+                    </div>
+                    <MudText Typo="Typo.body2" Class="mt-2">
+                        Nível @agent.CareerLevel · @agent.ExperiencePoints XP
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+@if (!Agents.Any())
+{
+    <MudPaper Class="pa-8 text-center">
+        <MudText Typo="Typo.h5">Nenhum funcionário contratado</MudText>
+        <MudText Class="mb-4">Contrate seu primeiro agente para começar</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/contratar">
+            Contratar Agente
+        </MudButton>
+    </MudPaper>
+}
+
+@code {
+    private List<AgentDto> Agents = [];
+    private int OnlineCount => Agents.Count(a => a.Status == "Running");
+
+    protected override async Task OnInitializedAsync()
+    {
+        Agents = await AgentService.GetAgentsAsync();
+    }
+
+    private Color GetLevelColor(int level) => level switch
+    {
+        0 => Color.Default,
+        1 => Color.Success,
+        2 => Color.Info,
+        3 => Color.Warning,
+        4 => Color.Error,
+        >=5 => Color.Secondary,
+        _ => Color.Default
+    };
+
+    private Color GetStatusColor(string status) => status switch
+    {
+        "Running" => Color.Success,
+        "Paused" => Color.Warning,
+        _ => Color.Default
+    };
+
+    private string GetStatusClass(string status) => status.ToLowerInvariant();
+}

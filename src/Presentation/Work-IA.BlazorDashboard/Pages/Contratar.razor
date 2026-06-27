@@ -1,0 +1,64 @@
+@page "/contratar"
+@using Work_IA.BlazorDashboard.Services
+@inject AgentService AgentService
+@inject NavigationManager Navigation
+
+<MudText Typo="Typo.h4">📋 Contratar Novo Funcionário</MudText>
+<MudText Class="mb-6">Adicione um novo agente à sua equipe</MudText>
+
+<MudPaper Class="pa-6" MaxWidth="500px">
+    <MudTextField @bind-Value="Name" Label="Nome do Agente"
+                  Placeholder="Ex: João Silva" For="@(() => Name)"
+                  Immediate="true" Class="mb-4" />
+
+    <MudSelect @bind-Value="Title" Label="Cargo" Class="mb-4">
+        <MudSelectItem Value="@("Intern")">Intern</MudSelectItem>
+        <MudSelectItem Value="@("Junior Specialist")">Junior Specialist</MudSelectItem>
+        <MudSelectItem Value="@("Pleno Specialist")">Pleno Specialist</MudSelectItem>
+        <MudSelectItem Value="@("Senior Specialist")">Senior Specialist</MudSelectItem>
+        <MudSelectItem Value="@("Tech Lead")">Tech Lead</MudSelectItem>
+        <MudSelectItem Value="@("Architect")">Architect</MudSelectItem>
+    </MudSelect>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               Disabled="@string.IsNullOrWhiteSpace(Name)"
+               OnClick="@HandleCreate" Class="mt-4" FullWidth="true">
+        Contratar
+    </MudButton>
+
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4">@Error</MudAlert>
+    }
+
+    @if (!string.IsNullOrEmpty(Success))
+    {
+        <MudAlert Severity="Severity.Success" Class="mt-4">@Success</MudAlert>
+    }
+</MudPaper>
+
+@code {
+    private string Name = "";
+    private string Title = "Intern";
+    private string Error = "";
+    private string Success = "";
+
+    private async Task HandleCreate()
+    {
+        Error = "";
+        Success = "";
+
+        var id = await AgentService.CreateAgentAsync(Name, Title);
+
+        if (id.HasValue)
+        {
+            Success = $"✅ {Name} contratado como {Title}!";
+            Name = "";
+            StateHasChanged();
+        }
+        else
+        {
+            Error = "Erro ao contratar agente. API está rodando?";
+        }
+    }
+}

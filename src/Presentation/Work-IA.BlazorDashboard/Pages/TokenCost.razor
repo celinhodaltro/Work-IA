@@ -1,0 +1,38 @@
+@page "/custos"
+@using Work_IA.BlazorDashboard.Services
+@inject AgentService AgentService
+
+<MudText Typo="Typo.h4">Custos por Agente</MudText>
+<MudText Class="mb-6">Gasto de tokens por agente nos ultimos 30 dias</MudText>
+
+<MudTable Items="@Costs" Hover="true" Striped="true">
+    <HeaderContent>
+        <MudTh>Agente</MudTh>
+        <MudTh>Cargo</MudTh>
+        <MudTh>Tokens In</MudTh>
+        <MudTh>Tokens Out</MudTh>
+        <MudTh>Total Tokens</MudTh>
+        <MudTh>Custo</MudTh>
+        <MudTh>Modelo Principal</MudTh>
+        <MudTh>Tarefas</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.AgentName</MudTd>
+        <MudTd>@context.AgentTitle</MudTd>
+        <MudTd>@context.TotalTokensIn</MudTd>
+        <MudTd>@context.TotalTokensOut</MudTd>
+        <MudTd>@context.TotalTokens</MudTd>
+        <MudTd>@context.TotalCost.ToString("C4")</MudTd>
+        <MudTd>@context.MostUsedModel</MudTd>
+        <MudTd>@context.TaskCount</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<AgentCostSummary> Costs = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        Costs = await AgentService.GetTokenCostsAsync();
+    }
+}
