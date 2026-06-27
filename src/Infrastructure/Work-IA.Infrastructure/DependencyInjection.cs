@@ -5,6 +5,8 @@ using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Workspace;
 using Work_IA.Domain.Workspace.Ports;
+using Work_IA.Infrastructure.Adapters;
+using Work_IA.Infrastructure.Communication;
 using Work_IA.Infrastructure.EventBus;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
@@ -45,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IEventStore, EventStore>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddSingleton<IEventBus, InMemoryEventBus>();
+        services.AddSingleton<ICommunicationBus, CommunicationBus>();
         services.AddSingleton<IFileSystemService>(new FileSystemService(workspacePath));
         services.AddSingleton<IGitIntegrationService>(new GitIntegrationService(workspacePath));
         services.AddSingleton<IFileSystemObserver>(sp =>
@@ -54,6 +57,14 @@ public static class DependencyInjection
             observer.StartAsync(workspacePathObj).GetAwaiter().GetResult();
             return observer;
         });
+
+        // OpenCode Adapter registration
+        services.AddSingleton<OpenCodeAdapter>();
+        services.AddSingleton<IOpenCodeOperations>(sp => sp.GetRequiredService<OpenCodeAdapter>());
+        services.AddSingleton<IWorkspaceAdapter>(sp => sp.GetRequiredService<OpenCodeAdapter>());
+        services.AddSingleton<FileSystemWorkspaceAdapter>();
+        services.AddSingleton<WorkspaceAdapterFactory>();
+        services.AddHostedService<OpenCodeBackgroundService>();
 
         return services;
     }

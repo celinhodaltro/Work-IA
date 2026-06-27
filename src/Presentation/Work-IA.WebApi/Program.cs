@@ -1,6 +1,7 @@
 using Work_IA.Application;
 using Work_IA.Infrastructure;
 using Work_IA.Infrastructure.Persistence;
+using Work_IA.WebApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,5 +30,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<AgentCommunicationHub>("/hub/agents");
 
 app.Run();
