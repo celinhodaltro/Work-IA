@@ -1,0 +1,37 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstats
+*.userprefs
+
+## Config
+appsettings.*.local.json
+appsettings.*.Development.json
+*.env
+
+## AI Office OS
+.agent-memory/
+.opencode-memory/
+.ai-memory/
+
+## Node
+node_modules/
+
+## Python
+__pycache__/
+*.pyc
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+## Build
+packages/
+*.nupkg
