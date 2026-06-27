@@ -15,10 +15,7 @@ public sealed class WorkIaDbContext : DbContext
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         UpdateAuditableEntities();
-
-        var result = await base.SaveChangesAsync(cancellationToken);
-
-        return result;
+        return await base.SaveChangesAsync(cancellationToken);
     }
 
     private void UpdateAuditableEntities()

@@ -12,13 +12,8 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddDbContext<WorkIaDbContext>(options =>
-            options.UseNpgsql(
+            options.UseSqlite(
                 configuration.GetConnectionString("DefaultConnection")));
-
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.Configuration = configuration.GetConnectionString("Redis");
-        });
 
         return services;
     }

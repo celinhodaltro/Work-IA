@@ -1,18 +1,8 @@
-version: '3.8'
+# SQLite é o banco padrão (portabilidade total - sem dependências externas)
+# RabbitMQ e Redis são opcionais para desenvolvimento avançado
+# Para usar: docker compose up -d rabbitmq redis
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: work-ia-postgres
-    environment:
-      POSTGRES_USER: workia
-      POSTGRES_PASSWORD: workia123
-      POSTGRES_DB: workia
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: work-ia-rabbitmq
@@ -22,12 +12,13 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: workia
       RABBITMQ_DEFAULT_PASS: workia123
+    profiles:
+      - optional
 
   redis:
     image: redis:7-alpine
     container_name: work-ia-redis
     ports:
       - "6379:6379"
-
-volumes:
-  postgres_data:
+    profiles:
+      - optional
