@@ -1,18 +1,25 @@
 ﻿@inherits LayoutComponentBase
 @using MudBlazor
+@using Work_IA.BlazorDashboard.Theme
 
-<MudThemeProvider />
+<MudThemeProvider Theme="@AIOfficeTheme.Create()" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" OnClick="@ToggleDrawer" />
+        <MudText Typo="Typo.h6" Class="ml-2">AI Office OS</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Inherit" />
+    </MudAppBar>
     <MudDrawer Open="@_drawerOpen" Variant="@DrawerVariant.Responsive">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h6">AI Office OS</MudText>
+            <MudText Typo="Typo.h6">Navigation</MudText>
         </MudDrawerHeader>
         <MudNavMenu>
-            <MudNavLink Href="/">Dashboard</MudNavLink>
-            <MudNavLink Href="/agents">Agents</MudNavLink>
-            <MudNavLink Href="/activity">Activity</MudNavLink>
+            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="/agents" Icon="@Icons.Material.Filled.Groups">Agents</MudNavLink>
+            <MudNavLink Href="/activity" Icon="@Icons.Material.Filled.Timeline">Activity</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent>
@@ -24,4 +31,5 @@
 
 @code {
     private bool _drawerOpen = true;
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 }
