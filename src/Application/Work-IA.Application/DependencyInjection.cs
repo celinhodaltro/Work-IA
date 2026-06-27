@@ -31,6 +31,8 @@ public static class DependencyInjection
         services.AddSingleton<AgentRoleFactory>();
         services.AddScoped<RoomSummaryService>();
 
+        services.AddScoped<AdapterManagerService>();
+
         return services;
     }
 }

@@ -8,7 +8,7 @@ using Work_IA.Domain.Workspace.Ports;
 
 namespace Work_IA.Infrastructure.Adapters;
 
-public sealed class OpenCodeAdapter : IWorkspaceAdapter, IOpenCodeOperations
+public sealed class OpenCodeAdapter : IWorkspaceAdapter, IOpenCodeOperations, IFileChangeObservable
 {
     private readonly IEventBus _eventBus;
     private readonly ILogger<OpenCodeAdapter> _logger;

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Workspace;
@@ -14,6 +15,7 @@ using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
 using Work_IA.Infrastructure.Persistence.Interceptors;
 using Work_IA.Infrastructure.Services;
+using Work_IA.Infrastructure.Workflows;
 using Work_IA.Infrastructure.Workspace;
 
 namespace Work_IA.Infrastructure;
@@ -68,9 +70,20 @@ public static class DependencyInjection
         services.AddSingleton<WorkspaceAdapterFactory>();
         services.AddHostedService<OpenCodeBackgroundService>();
 
+        // Plugin system registration
+        services.AddSingleton<IPluginLoader>(sp =>
+        {
+            var loader = new PluginLoader(sp, sp.GetRequiredService<ILogger<PluginLoader>>());
+            loader.RegisterPlugin(new ClaudeCodePlugin());
+            return loader;
+        });
+
         services.AddSingleton<AgentStartupService>();
         services.AddSingleton<IAgentInitializationService>(sp => sp.GetRequiredService<AgentStartupService>());
         services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<AgentStartupService>());
+
+        services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
+        services.AddHostedService<WorkflowStartupService>();
 
         return services;
     }
