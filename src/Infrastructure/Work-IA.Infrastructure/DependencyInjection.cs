@@ -3,12 +3,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
+using Work_IA.Domain.Workspace;
+using Work_IA.Domain.Workspace.Ports;
 using Work_IA.Infrastructure.EventBus;
-using Work_IA.Infrastructure.Memory;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
 using Work_IA.Infrastructure.Persistence.Interceptors;
 using Work_IA.Infrastructure.Services;
+using Work_IA.Infrastructure.Workspace;
 
 namespace Work_IA.Infrastructure;
 
@@ -18,6 +20,11 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        var workspacePath = configuration.GetValue<string>("Workspace:Path")
+            ?? Directory.GetCurrentDirectory();
+
+        var ignorePatterns = configuration.GetSection("Workspace:IgnorePatterns").Get<List<string>>();
+
         services.AddScoped<DispatchDomainEventsInterceptor>();
 
         services.AddDbContext<WorkIaDbContext>((sp, options) =>
@@ -38,7 +45,15 @@ public static class DependencyInjection
         services.AddScoped<IEventStore, EventStore>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddSingleton<IEventBus, InMemoryEventBus>();
-        services.AddScoped<IMemoryStore, DatabaseMemoryStore>();
+        services.AddSingleton<IFileSystemService>(new FileSystemService(workspacePath));
+        services.AddSingleton<IGitIntegrationService>(new GitIntegrationService(workspacePath));
+        services.AddSingleton<IFileSystemObserver>(sp =>
+        {
+            var observer = new FileSystemWatcherObserver(ignorePatterns);
+            var workspacePathObj = new WorkspacePath(workspacePath);
+            observer.StartAsync(workspacePathObj).GetAwaiter().GetResult();
+            return observer;
+        });
 
         return services;
     }

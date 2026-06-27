@@ -8,9 +8,6 @@ public sealed class WorkspacePath : ValueObject
 
     public WorkspacePath(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("Path cannot be empty", nameof(value));
-
         Value = value;
     }
 
@@ -20,4 +17,6 @@ public sealed class WorkspacePath : ValueObject
     }
 
     public override string ToString() => Value;
+
+    public bool IsEmpty => string.IsNullOrWhiteSpace(Value);
 }
