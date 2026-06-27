@@ -20,28 +20,28 @@ public static class Program
 
         var window = Window.Create(options);
         OfficeRenderer? renderer = null;
+        IInputContext? input = null;
 
         window.Load += async () =>
         {
             var gl = GL.GetApi(window);
             renderer = new OfficeRenderer(gl, hubClient, window.Size);
-            var input = window.CreateInput();
-            input.Mice[0].Scroll += (_, scroll) => { };
+            input = window.CreateInput();
             await hubClient.ConnectAsync();
         };
 
         window.Update += (delta) =>
         {
-            var input = window.CreateInput();
-            renderer?.HandleInput(input);
+            if (input is not null)
+                renderer?.HandleInput(input);
             renderer?.Update((float)delta);
         };
 
         window.Render += (_) => renderer?.Render();
-
         window.Resize += (size) => renderer?.Resize(size);
 
         window.Run();
+        input?.Dispose();
         await hubClient.DisposeAsync();
     }
 }
