@@ -12,11 +12,13 @@ public sealed class AgentRoleFactory
         [AgentRole.HeadOfEngineering] = typeof(HeadOfEngineeringAgent),
         [AgentRole.TechLeadBackend] = typeof(TechLeadBackendAgent),
         [AgentRole.TechLeadFrontend] = typeof(TechLeadFrontendAgent),
+        [AgentRole.TechLeadGame] = typeof(TechLeadGameAgent),
         [AgentRole.TechLeadDevOps] = typeof(TechLeadDevOpsAgent),
+        [AgentRole.Architect] = typeof(ArchitectAgent),
+        [AgentRole.Specialist] = typeof(SpecialistAgent),
         [AgentRole.TestLead] = typeof(TestLeadAgent),
         [AgentRole.ChiefReviewer] = typeof(ChiefReviewerAgent),
         [AgentRole.AuditLead] = typeof(AuditLeadAgent),
-        [AgentRole.Architect] = typeof(ArchitectAgent),
         [AgentRole.Ceo] = typeof(CeoAgent),
     };
 

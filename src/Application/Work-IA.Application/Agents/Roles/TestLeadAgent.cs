@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Agents;

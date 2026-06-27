@@ -7,26 +7,32 @@ namespace Work_IA.Application.Agents.Roles;
 
 public sealed class TechLeadBackendAgent : AgentBase
 {
-    public TechLeadBackendAgent(IEventBus eventBus, IMediator mediator, ILogger<TechLeadBackendAgent> logger)
+    private readonly AgentRegistry _registry;
+
+    public TechLeadBackendAgent(IEventBus eventBus, IMediator mediator, AgentRegistry registry, ILogger<TechLeadBackendAgent> logger)
         : base("Tech Lead Backend", AgentRole.TechLeadBackend, eventBus, mediator, logger)
     {
+        _registry = registry;
         RegisterObservation("FileModified", ObservationPriority.High, e => e?.ToString()?.Contains(".cs") == true);
         RegisterObservation("FileModified", ObservationPriority.Critical, e => e?.ToString()?.Contains(".csproj") == true);
         RegisterObservation("TestFailed", ObservationPriority.High);
         RegisterObservation("BuildFailed", ObservationPriority.Critical);
         RegisterObservation("GitCommit", ObservationPriority.Medium);
     }
-    
-    protected override async Task<TaskResult> ProcessTaskAsync(AgentTask task, CancellationToken cancellationToken)
+
+    protected override Task<TaskResult> ProcessTaskAsync(AgentTask task, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Tech Lead Backend processing: {Task}", task.Title);
-        
+
         if (task.Title.Contains("review", StringComparison.OrdinalIgnoreCase))
         {
-            var architect = new AgentId(Guid.NewGuid());
-            Logger.LogInformation("Delegating review to architect {ArchitectId}", architect);
+            var architects = _registry.GetByRole(AgentRole.Architect);
+            if (architects.Count > 0)
+            {
+                Logger.LogInformation("Delegating review to architect {ArchitectId}", architects[0].AgentId);
+            }
         }
-        
-        return TaskResult.Ok($"Backend task completed: {task.Title}");
+
+        return Task.FromResult(TaskResult.Ok($"Backend task completed: {task.Title}"));
     }
 }

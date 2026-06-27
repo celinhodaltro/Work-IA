@@ -1,10 +1,11 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Agents.Roles;
 
-public sealed class ArchitectAgent : AgentBase
+public sealed class ArchitectAgent : AgentBase, IVetoPowerAgent
 {
     public ArchitectAgent(IEventBus eventBus, IMediator mediator, ILogger<ArchitectAgent> logger)
         : base("Architect", AgentRole.Architect, eventBus, mediator, logger)

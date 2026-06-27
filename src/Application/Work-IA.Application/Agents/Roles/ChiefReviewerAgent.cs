@@ -1,10 +1,11 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Agents.Roles;
 
-public sealed class ChiefReviewerAgent : AgentBase
+public sealed class ChiefReviewerAgent : AgentBase, IReviewerAgent
 {
     public ChiefReviewerAgent(IEventBus eventBus, IMediator mediator, ILogger<ChiefReviewerAgent> logger)
         : base("Chief Reviewer", AgentRole.ChiefReviewer, eventBus, mediator, logger)

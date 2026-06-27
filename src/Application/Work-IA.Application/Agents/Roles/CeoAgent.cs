@@ -1,10 +1,11 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Agents.Roles;
 
-public sealed class CeoAgent : AgentBase
+public sealed class CeoAgent : AgentBase, ICeoAgent
 {
     public CeoAgent(IEventBus eventBus, IMediator mediator, ILogger<CeoAgent> logger)
         : base("CEO", AgentRole.Ceo, eventBus, mediator, logger)

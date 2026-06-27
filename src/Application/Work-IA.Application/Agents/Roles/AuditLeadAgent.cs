@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Agents;
@@ -14,11 +15,11 @@ public sealed class AuditLeadAgent : AgentBase
         RegisterObservation("ArchitectureDecisionMade", ObservationPriority.High);
         RegisterObservation("MemoryRecorded", ObservationPriority.Medium);
     }
-    
-    protected override async Task<TaskResult> ProcessTaskAsync(AgentTask task, CancellationToken cancellationToken)
+
+    protected override Task<TaskResult> ProcessTaskAsync(AgentTask task, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Audit Lead: Auditing {Task}", task.Title);
-        
+
         var lessons = new List<string>
         {
             "What went wrong?",
@@ -27,12 +28,12 @@ public sealed class AuditLeadAgent : AgentBase
             "What worked well?",
             "What should become standard?"
         };
-        
+
         foreach (var lesson in lessons)
         {
             Logger.LogInformation("Audit question: {Lesson}", lesson);
         }
-        
-        return TaskResult.Ok($"Audit completed: {task.Title}");
+
+        return Task.FromResult(TaskResult.Ok($"Audit completed: {task.Title}"));
     }
 }

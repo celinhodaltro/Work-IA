@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Workspace;
 using Work_IA.Domain.Workspace.Ports;
 using Work_IA.Infrastructure.Adapters;
+using Work_IA.Infrastructure.BackgroundServices;
 using Work_IA.Infrastructure.Communication;
 using Work_IA.Infrastructure.EventBus;
 using Work_IA.Infrastructure.Persistence;
@@ -66,8 +68,9 @@ public static class DependencyInjection
         services.AddSingleton<WorkspaceAdapterFactory>();
         services.AddHostedService<OpenCodeBackgroundService>();
 
-        services.AddSingleton<IAgentInitializationService, AgentStartupService>();
-        services.AddHostedService<AgentStartupService>();
+        services.AddSingleton<AgentStartupService>();
+        services.AddSingleton<IAgentInitializationService>(sp => sp.GetRequiredService<AgentStartupService>());
+        services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<AgentStartupService>());
 
         return services;
     }
