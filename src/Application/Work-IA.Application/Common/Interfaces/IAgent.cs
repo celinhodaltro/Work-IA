@@ -7,8 +7,10 @@ public interface IAgent
 {
     AgentId AgentId { get; }
     string Name { get; }
-    AgentRole Role { get; }
+    AgentTitle Title { get; }
+    AgentCareerLevel CareerLevel { get; }
     AgentStatus Status { get; }
+    IReadOnlyList<AgentSkill> Skills { get; }
     
     Task InitializeAsync(CancellationToken cancellationToken = default);
     Task StartAsync(CancellationToken cancellationToken = default);

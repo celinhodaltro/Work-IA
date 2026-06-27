@@ -24,7 +24,7 @@ public sealed class StartAgentCommandHandler : IRequestHandler<StartAgentCommand
         if (agent is null)
             throw new NotFoundException(nameof(Agent), request.AgentId.Value);
 
-        await agent.StartAsync();
+        agent.Start();
 
         await _repository.UpdateAsync(agent, cancellationToken);
 

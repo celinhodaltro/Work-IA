@@ -8,73 +8,122 @@ public sealed class Agent : AggregateRoot<AgentId>
     private readonly List<ObservationRule> _observationRules = [];
     private readonly List<AgentMessage> _inbox = [];
 
+    public AgentId AgentId { get; private set; }
     public AgentName Name { get; private set; }
-    public AgentRole Role { get; private set; }
+    public AgentTitle Title { get; private set; }
+    public AgentCareerLevel CareerLevel { get; private set; }
     public AgentStatus Status { get; private set; }
-    public IReadOnlyList<ObservationRule> ObservationRules => _observationRules.AsReadOnly();
-    public IReadOnlyList<AgentMessage> Inbox => _inbox.AsReadOnly();
+    public int ExperiencePoints { get; private set; }
+    public List<AgentSkill> Skills { get; private set; }
+    public AgentId? MentorId { get; private set; }
+    public DateTime JoinedAt { get; private set; }
+    public DateTime? LastPromotionAt { get; private set; }
     public DateTime? LastHeartbeat { get; private set; }
 
-    private Agent(AgentId id, AgentName name, AgentRole role) : base(id)
+    public IReadOnlyList<ObservationRule> ObservationRules => _observationRules.AsReadOnly();
+    public IReadOnlyList<AgentMessage> Inbox => _inbox.AsReadOnly();
+
+    private Agent() : base(AgentId.New()) { }
+
+    public Agent(AgentId id, AgentName name, AgentTitle title, AgentCareerLevel careerLevel) : base(id)
     {
+        AgentId = id;
         Name = name;
-        Role = role;
+        Title = title;
+        CareerLevel = careerLevel;
         Status = AgentStatus.Created;
-        LastHeartbeat = DateTime.UtcNow;
+        ExperiencePoints = 0;
+        Skills = [];
+        JoinedAt = DateTime.UtcNow;
     }
 
-    public static Agent Create(AgentName name, AgentRole role)
+    public static Agent Create(AgentName name, AgentTitle title)
     {
-        var agent = new Agent(AgentId.New(), name, role);
-        agent.RaiseDomainEvent(new AgentCreatedDomainEvent(agent.Id, name.Value, role));
+        var agent = new Agent(AgentId.New(), name, title, AgentCareerLevel.Intern)
+        {
+            Status = AgentStatus.Created,
+            ExperiencePoints = 0,
+            Skills = [],
+            JoinedAt = DateTime.UtcNow
+        };
+        agent.RaiseDomainEvent(new AgentCreatedDomainEvent(agent.AgentId, name.Value, title.Value));
         return agent;
     }
 
-    public Task StartAsync()
+    public void Start()
     {
         if (Status != AgentStatus.Created && Status != AgentStatus.Stopped)
             throw new InvalidOperationException($"Cannot start agent in {Status} status");
-
         Status = AgentStatus.Running;
-        LastHeartbeat = DateTime.UtcNow;
-        RaiseDomainEvent(new AgentStartedDomainEvent(Id));
-        return Task.CompletedTask;
+        UpdateHeartbeat();
+        RaiseDomainEvent(new AgentStartedDomainEvent(AgentId));
     }
 
-    public Task PauseAsync()
+    public void Pause()
     {
         if (Status != AgentStatus.Running)
             throw new InvalidOperationException($"Cannot pause agent in {Status} status");
-
         Status = AgentStatus.Paused;
-        RaiseDomainEvent(new AgentPausedDomainEvent(Id));
-        return Task.CompletedTask;
+        RaiseDomainEvent(new AgentPausedDomainEvent(AgentId));
     }
 
-    public Task StopAsync()
+    public void Stop()
     {
         Status = AgentStatus.Stopped;
-        RaiseDomainEvent(new AgentStoppedDomainEvent(Id));
-        return Task.CompletedTask;
+        RaiseDomainEvent(new AgentStoppedDomainEvent(AgentId));
+    }
+
+    public void AssignSkill(AgentSkill skill)
+    {
+        if (!Skills.Any(s => s.Name.Equals(skill.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            Skills.Add(skill);
+        }
+    }
+
+    public void AddExperience(int points)
+    {
+        if (points <= 0)
+            throw new ArgumentException("Experience points must be positive", nameof(points));
+        ExperiencePoints += points;
+        RaiseDomainEvent(new ExperienceGainedDomainEvent(AgentId, points, ExperiencePoints));
+    }
+
+    public bool CanPromoteTo(AgentCareerLevel targetLevel, int xpRequired)
+    {
+        return targetLevel > CareerLevel && ExperiencePoints >= xpRequired;
+    }
+
+    public void Promote(AgentTitle newTitle, AgentCareerLevel newLevel)
+    {
+        if (newLevel <= CareerLevel)
+            throw new InvalidOperationException($"Cannot promote to same or lower level. Current: {CareerLevel}, Target: {newLevel}");
+        Title = newTitle;
+        CareerLevel = newLevel;
+        LastPromotionAt = DateTime.UtcNow;
+        RaiseDomainEvent(new AgentPromotedDomainEvent(AgentId, newTitle.Value, newLevel));
+    }
+
+    public void AssignMentor(AgentId mentorId)
+    {
+        MentorId = mentorId;
     }
 
     public void AddObservationRule(ObservationRule rule)
     {
         _observationRules.Add(rule);
-        RaiseDomainEvent(new ObservationRuleAddedDomainEvent(Id, rule.EventType));
+        RaiseDomainEvent(new ObservationRuleAddedDomainEvent(AgentId, rule.EventType));
     }
 
-    public bool ShouldObserve(string eventType, object? eventData = null)
+    public bool ShouldObserve(string eventType)
     {
-        return _observationRules.Any(r =>
-            r.EventType == eventType &&
-            (r.Condition is null || r.Condition(eventData!)));
+        return _observationRules.Any(r => r.EventType == eventType);
     }
 
     public void ReceiveMessage(AgentMessage message)
     {
         _inbox.Add(message);
-        RaiseDomainEvent(new MessageReceivedDomainEvent(Id, message.From));
+        RaiseDomainEvent(new MessageReceivedDomainEvent(AgentId, message.From));
     }
 
     public void UpdateHeartbeat()

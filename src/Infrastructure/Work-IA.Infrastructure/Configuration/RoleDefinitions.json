@@ -1,0 +1,11 @@
+{
+  "roles": [
+    { "title": "Intern", "level": 0, "permissions": ["observe"], "xpRequired": 0 },
+    { "title": "Junior Specialist", "level": 1, "permissions": ["observe", "read", "write"], "xpRequired": 100 },
+    { "title": "Pleno Specialist", "level": 2, "permissions": ["observe", "read", "write", "delegate"], "xpRequired": 500 },
+    { "title": "Senior Specialist", "level": 3, "permissions": ["observe", "read", "write", "delegate", "review"], "xpRequired": 2000 },
+    { "title": "Tech Lead", "level": 4, "permissions": ["observe", "read", "write", "delegate", "review", "block"], "xpRequired": 5000 },
+    { "title": "Architect", "level": 5, "permissions": ["*"], "xpRequired": 10000 },
+    { "title": "Head of Engineering", "level": 6, "permissions": ["*"], "xpRequired": 20000 }
+  ]
+}

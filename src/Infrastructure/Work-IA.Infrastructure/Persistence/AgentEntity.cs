@@ -4,8 +4,14 @@ public sealed class AgentEntity
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int Role { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public int CareerLevel { get; set; }
     public int Status { get; set; }
+    public int ExperiencePoints { get; set; }
+    public string? SkillsJson { get; set; }
+    public Guid? MentorId { get; set; }
+    public DateTime JoinedAt { get; set; }
+    public DateTime? LastPromotionAt { get; set; }
     public DateTime? LastHeartbeat { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

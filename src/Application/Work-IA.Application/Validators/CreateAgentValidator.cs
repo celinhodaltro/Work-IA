@@ -11,7 +11,8 @@ public sealed class CreateAgentValidator : AbstractValidator<CreateAgentCommand>
             .NotEmpty()
             .MaximumLength(100);
 
-        RuleFor(v => v.Role)
-            .IsInEnum();
+        RuleFor(v => v.Title)
+            .NotEmpty()
+            .MaximumLength(200);
     }
 }

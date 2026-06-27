@@ -41,10 +41,10 @@ public sealed class CommunicationBus : ICommunicationBus, IDisposable
         _logger.LogInformation("Message sent from {From} to {To}", from, to);
     }
 
-    public async Task BroadcastAsync(AgentId from, string content, AgentRole? targetRole = null, CancellationToken cancellationToken = default)
+    public async Task BroadcastAsync(AgentId from, string content, AgentCareerLevel? targetLevel = null, CancellationToken cancellationToken = default)
     {
-        var targets = targetRole.HasValue
-            ? _registry.GetByRole(targetRole.Value)
+        var targets = targetLevel.HasValue
+            ? _registry.GetByCareerLevel(targetLevel.Value)
             : _registry.GetAll();
 
         foreach (var target in targets)
@@ -57,7 +57,7 @@ public sealed class CommunicationBus : ICommunicationBus, IDisposable
             }
         }
 
-        _logger.LogInformation("Broadcast from {From} to role {Role}", from, targetRole);
+        _logger.LogInformation("Broadcast from {From} to level {Level}", from, targetLevel);
     }
 
     public Task<ConversationRoom> CreateRoomAsync(string topic, List<AgentId> participants, CancellationToken cancellationToken = default)

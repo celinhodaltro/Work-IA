@@ -6,5 +6,5 @@ namespace Work_IA.Application.Agents.Commands;
 public sealed record DelegateTaskCommand(
     string Title,
     string Description,
-    AgentRole TargetRole,
+    AgentCareerLevel TargetLevel,
     TaskPriority Priority) : IRequest<TaskResult>;

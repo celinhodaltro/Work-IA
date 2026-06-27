@@ -15,7 +15,7 @@ public sealed class DelegateTaskValidator : AbstractValidator<DelegateTaskComman
             .NotEmpty()
             .MaximumLength(2000);
 
-        RuleFor(v => v.TargetRole)
+        RuleFor(v => v.TargetLevel)
             .IsInEnum();
     }
 }

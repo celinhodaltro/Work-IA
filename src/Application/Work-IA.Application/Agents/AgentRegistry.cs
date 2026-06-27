@@ -29,9 +29,21 @@ public sealed class AgentRegistry
         return _agents.Values.ToList();
     }
     
-    public IReadOnlyList<IAgent> GetByRole(AgentRole role)
+    public IReadOnlyList<IAgent> GetByCareerLevel(AgentCareerLevel level)
     {
-        return _agents.Values.Where(a => a.Role == role).ToList();
+        return _agents.Values.Where(a => a.CareerLevel == level).ToList();
+    }
+
+    public IReadOnlyList<IAgent> GetByTitle(string title)
+    {
+        return _agents.Values.Where(a => a.Title.Value.Equals(title, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    public IReadOnlyList<IAgent> GetBySkill(string skillName, int minProficiency = 1)
+    {
+        return _agents.Values.Where(a => a.Skills.Any(s => 
+            s.Name.Equals(skillName, StringComparison.OrdinalIgnoreCase) && 
+            s.Proficiency >= minProficiency)).ToList();
     }
     
     public IReadOnlyList<IAgent> GetOnline()

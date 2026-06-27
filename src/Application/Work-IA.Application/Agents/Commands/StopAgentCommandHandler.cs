@@ -24,7 +24,7 @@ public sealed class StopAgentCommandHandler : IRequestHandler<StopAgentCommand>
         if (agent is null)
             throw new NotFoundException(nameof(Agent), request.AgentId.Value);
 
-        await agent.StopAsync();
+        agent.Stop();
 
         await _repository.UpdateAsync(agent, cancellationToken);
 

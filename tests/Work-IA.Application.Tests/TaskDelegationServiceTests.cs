@@ -17,7 +17,7 @@ public sealed class DelegateTaskCommandTests
     {
         var registry = new AgentRegistry();
         var handler = new DelegateTaskCommandHandler(registry);
-        var command = new DelegateTaskCommand("Test", "Desc", AgentRole.Architect, TaskPriority.Normal);
+        var command = new DelegateTaskCommand("Test", "Desc", AgentCareerLevel.Architect, TaskPriority.Normal);
         var result = await handler.Handle(command, CancellationToken.None);
         result.Success.Should().BeFalse();
     }
@@ -33,7 +33,7 @@ public sealed class DelegateTaskCommandTests
         await agent.InitializeAsync();
         registry.Register(agent);
         var handler = new DelegateTaskCommandHandler(registry);
-        var command = new DelegateTaskCommand("Test", "Desc", AgentRole.TechLeadBackend, TaskPriority.Normal);
+        var command = new DelegateTaskCommand("Test", "Desc", AgentCareerLevel.Intern, TaskPriority.Normal);
         var result = await handler.Handle(command, CancellationToken.None);
         result.Success.Should().BeTrue();
     }
@@ -41,7 +41,7 @@ public sealed class DelegateTaskCommandTests
     public sealed class TestAgent : AgentBase
     {
         public TestAgent(IEventBus eventBus, IMediator mediator, ILogger<AgentBase> logger)
-            : base("TestAgent", AgentRole.TechLeadBackend, eventBus, mediator, logger) { }
+            : base(Agent.Create(new AgentName("TestAgent"), new AgentTitle("Tech Lead Backend")), eventBus, mediator, logger) { }
 
         protected override Task<TaskResult> ProcessTaskAsync(AgentTask task, CancellationToken ct)
         {

@@ -24,7 +24,7 @@ public sealed class PauseAgentCommandHandler : IRequestHandler<PauseAgentCommand
         if (agent is null)
             throw new NotFoundException(nameof(Agent), request.AgentId.Value);
 
-        await agent.PauseAsync();
+        agent.Pause();
 
         await _repository.UpdateAsync(agent, cancellationToken);
 

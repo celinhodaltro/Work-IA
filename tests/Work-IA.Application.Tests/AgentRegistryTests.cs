@@ -31,17 +31,17 @@ public sealed class AgentRegistryTests
     }
 
     [Fact]
-    public void GetByRole_ShouldFilterCorrectly()
+    public void GetByCareerLevel_ShouldFilterCorrectly()
     {
         var registry = new AgentRegistry();
         var agent1 = new Mock<IAgent>();
         agent1.Setup(a => a.AgentId).Returns(AgentId.New());
-        agent1.Setup(a => a.Role).Returns(AgentRole.Architect);
+        agent1.Setup(a => a.CareerLevel).Returns(AgentCareerLevel.Architect);
         var agent2 = new Mock<IAgent>();
         agent2.Setup(a => a.AgentId).Returns(AgentId.New());
-        agent2.Setup(a => a.Role).Returns(AgentRole.TechLeadBackend);
+        agent2.Setup(a => a.CareerLevel).Returns(AgentCareerLevel.TechLead);
         registry.Register(agent1.Object);
         registry.Register(agent2.Object);
-        registry.GetByRole(AgentRole.Architect).Should().HaveCount(1);
+        registry.GetByCareerLevel(AgentCareerLevel.Architect).Should().HaveCount(1);
     }
 }

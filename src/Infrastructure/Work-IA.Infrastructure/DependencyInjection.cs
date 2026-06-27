@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using Work_IA.Domain.Workflows;
 using Work_IA.Infrastructure.Adapters;
 using Work_IA.Infrastructure.BackgroundServices;
 using Work_IA.Infrastructure.Communication;
+using Work_IA.Infrastructure.Configuration;
 using Work_IA.Infrastructure.EventBus;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
@@ -41,6 +43,8 @@ public static class DependencyInjection
 
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.AddScoped<IWorkflowRepository, WorkflowRepository>();
+
+        services.AddSingleton<RoleDefinitionProvider>();
 
         services.AddSingleton<IEventTypeResolver>(sp =>
         {

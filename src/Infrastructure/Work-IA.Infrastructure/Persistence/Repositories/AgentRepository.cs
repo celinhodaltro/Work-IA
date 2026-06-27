@@ -1,4 +1,4 @@
-using System.Reflection;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Agents;
@@ -8,6 +8,7 @@ namespace Work_IA.Infrastructure.Persistence.Repositories;
 public sealed class AgentRepository : IAgentRepository
 {
     private readonly WorkIaDbContext _context;
+    private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
     public AgentRepository(WorkIaDbContext context)
     {
@@ -50,10 +51,19 @@ public sealed class AgentRepository : IAgentRepository
         return entities.Select(MapToDomain).ToList();
     }
 
-    public async Task<IReadOnlyList<Agent>> GetByRoleAsync(AgentRole role, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Agent>> GetByCareerLevelAsync(AgentCareerLevel level, CancellationToken cancellationToken = default)
     {
         var entities = await _context.Set<AgentEntity>()
-            .Where(e => e.Role == (int)role)
+            .Where(e => e.CareerLevel == (int)level)
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(MapToDomain).ToList();
+    }
+
+    public async Task<IReadOnlyList<Agent>> GetByTitleAsync(string title, CancellationToken cancellationToken = default)
+    {
+        var entities = await _context.Set<AgentEntity>()
+            .Where(e => e.Title == title)
             .ToListAsync(cancellationToken);
 
         return entities.Select(MapToDomain).ToList();
@@ -73,17 +83,35 @@ public sealed class AgentRepository : IAgentRepository
 
     private static Agent MapToDomain(AgentEntity entity)
     {
-        var ctor = typeof(Agent).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
-            .First(c => c.GetParameters().Length == 3);
-
-        var agent = (Agent)ctor.Invoke([
+        var agent = new Agent(
             AgentId.From(entity.Id),
             new AgentName(entity.Name),
-            (AgentRole)entity.Role]);
+            new AgentTitle(entity.Title),
+            (AgentCareerLevel)entity.CareerLevel);
 
         var agentType = typeof(Agent);
         agentType.GetProperty(nameof(Agent.Status))!.SetValue(agent, (AgentStatus)entity.Status);
+        agentType.GetProperty(nameof(Agent.ExperiencePoints))!.SetValue(agent, entity.ExperiencePoints);
         agentType.GetProperty(nameof(Agent.LastHeartbeat))!.SetValue(agent, entity.LastHeartbeat);
+        agentType.GetProperty(nameof(Agent.JoinedAt))!.SetValue(agent, entity.JoinedAt);
+        agentType.GetProperty(nameof(Agent.LastPromotionAt))!.SetValue(agent, entity.LastPromotionAt);
+
+        if (entity.MentorId.HasValue)
+        {
+            agentType.GetProperty(nameof(Agent.MentorId))!.SetValue(agent, AgentId.From(entity.MentorId.Value));
+        }
+
+        if (!string.IsNullOrEmpty(entity.SkillsJson))
+        {
+            var skills = JsonSerializer.Deserialize<List<SkillDto>>(entity.SkillsJson, _jsonOptions);
+            if (skills is not null)
+            {
+                foreach (var skill in skills)
+                {
+                    agent.AssignSkill(new AgentSkill(skill.Name, skill.Proficiency));
+                }
+            }
+        }
 
         var baseType = typeof(Entity<AgentId>);
         baseType.GetProperty(nameof(Entity<AgentId>.CreatedAt))!.SetValue(agent, entity.CreatedAt);
@@ -96,13 +124,27 @@ public sealed class AgentRepository : IAgentRepository
     {
         return new AgentEntity
         {
-            Id = agent.Id.Value,
+            Id = agent.AgentId.Value,
             Name = agent.Name.Value,
-            Role = (int)agent.Role,
+            Title = agent.Title.Value,
+            CareerLevel = (int)agent.CareerLevel,
             Status = (int)agent.Status,
+            ExperiencePoints = agent.ExperiencePoints,
+            SkillsJson = agent.Skills.Count > 0
+                ? JsonSerializer.Serialize(agent.Skills.Select(s => new SkillDto { Name = s.Name, Proficiency = s.Proficiency }), _jsonOptions)
+                : null,
+            MentorId = agent.MentorId?.Value,
+            JoinedAt = agent.JoinedAt,
+            LastPromotionAt = agent.LastPromotionAt,
             LastHeartbeat = agent.LastHeartbeat,
             CreatedAt = agent.CreatedAt,
             UpdatedAt = agent.UpdatedAt
         };
+    }
+
+    private sealed class SkillDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public int Proficiency { get; set; }
     }
 }

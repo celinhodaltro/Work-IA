@@ -7,12 +7,12 @@ public sealed record AgentCreatedDomainEvent : DomainEvent
 {
     public AgentId AgentId { get; }
     public string AgentName { get; }
-    public AgentRole AgentRole { get; }
+    public string AgentTitle { get; }
 
-    public AgentCreatedDomainEvent(AgentId agentId, string agentName, AgentRole agentRole)
+    public AgentCreatedDomainEvent(AgentId agentId, string agentName, string agentTitle)
     {
         AgentId = agentId;
         AgentName = agentName;
-        AgentRole = agentRole;
+        AgentTitle = agentTitle;
     }
 }

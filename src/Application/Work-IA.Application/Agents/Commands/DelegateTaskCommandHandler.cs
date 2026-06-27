@@ -15,12 +15,12 @@ public sealed class DelegateTaskCommandHandler : IRequestHandler<DelegateTaskCom
 
     public async Task<TaskResult> Handle(DelegateTaskCommand request, CancellationToken cancellationToken)
     {
-        var candidates = _registry.GetByRole(request.TargetRole)
+        var candidates = _registry.GetByCareerLevel(request.TargetLevel)
             .Where(a => a.Status == AgentStatus.Running)
             .ToList();
 
         if (candidates.Count == 0)
-            return TaskResult.Fail($"No available agents found for role {request.TargetRole}");
+            return TaskResult.Fail($"No available agents found for level {request.TargetLevel}");
 
         var target = candidates[Random.Shared.Next(candidates.Count)];
 

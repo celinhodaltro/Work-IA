@@ -6,19 +6,21 @@ using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Agents;
 
-public abstract class AgentBase : IAgent
+public class AgentBase : IAgent
 {
     protected readonly Agent Agent;
     protected readonly IEventBus EventBus;
     protected readonly IMediator Mediator;
     protected readonly ILogger Logger;
     
-    public AgentId AgentId => Agent.Id;
+    public AgentId AgentId => Agent.AgentId;
     public string Name => Agent.Name.Value;
-    public AgentRole Role => Agent.Role;
+    public AgentTitle Title => Agent.Title;
+    public AgentCareerLevel CareerLevel => Agent.CareerLevel;
     public AgentStatus Status => Agent.Status;
+    public IReadOnlyList<AgentSkill> Skills => Agent.Skills.AsReadOnly();
     
-    protected AgentBase(Agent agent, IEventBus eventBus, IMediator mediator, ILogger logger)
+    public AgentBase(Agent agent, IEventBus eventBus, IMediator mediator, ILogger logger)
     {
         Agent = agent;
         EventBus = eventBus;
@@ -26,11 +28,6 @@ public abstract class AgentBase : IAgent
         Logger = logger;
     }
 
-    protected AgentBase(string name, AgentRole role, IEventBus eventBus, IMediator mediator, ILogger logger)
-        : this(Agent.Create(new AgentName(name), role), eventBus, mediator, logger)
-    {
-    }
-    
     protected void RegisterObservation(string eventType, ObservationPriority priority = ObservationPriority.Medium, Func<object, bool>? condition = null)
     {
         Agent.AddObservationRule(new ObservationRule(eventType, priority, condition));
@@ -40,7 +37,7 @@ public abstract class AgentBase : IAgent
     {
         if (Agent.Status == AgentStatus.Created)
         {
-            await Agent.StartAsync();
+            Agent.Start();
             await DispatchDomainEventsAsync(cancellationToken);
         }
         
@@ -49,19 +46,19 @@ public abstract class AgentBase : IAgent
     
     public virtual async Task StartAsync(CancellationToken cancellationToken = default)
     {
-        await Agent.StartAsync();
+        Agent.Start();
         await DispatchDomainEventsAsync(cancellationToken);
     }
     
     public virtual async Task PauseAsync(CancellationToken cancellationToken = default)
     {
-        await Agent.PauseAsync();
+        Agent.Pause();
         await DispatchDomainEventsAsync(cancellationToken);
     }
     
     public virtual async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        await Agent.StopAsync();
+        Agent.Stop();
         await DispatchDomainEventsAsync(cancellationToken);
     }
     
@@ -106,7 +103,11 @@ public abstract class AgentBase : IAgent
         }
     }
     
-    protected abstract Task<TaskResult> ProcessTaskAsync(AgentTask task, CancellationToken cancellationToken);
+    protected virtual Task<TaskResult> ProcessTaskAsync(AgentTask task, CancellationToken cancellationToken)
+    {
+        Logger.LogInformation("Agent {AgentName} processing: {Task}", Name, task.Title);
+        return Task.FromResult(TaskResult.Ok($"Task completed by {Name}: {task.Title}"));
+    }
     
     private async Task DispatchDomainEventsAsync(CancellationToken cancellationToken)
     {

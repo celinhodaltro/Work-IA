@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Work_IA.Application.Agents;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
@@ -11,30 +12,36 @@ public sealed class CreateAgentCommandHandler : IRequestHandler<CreateAgentComma
     private readonly IAgentRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly AgentRegistry _agentRegistry;
-    private readonly AgentRoleFactory _agentRoleFactory;
+    private readonly IEventBus _eventBus;
+    private readonly IMediator _mediator;
+    private readonly ILogger<CreateAgentCommandHandler> _logger;
 
     public CreateAgentCommandHandler(
         IAgentRepository repository,
         IUnitOfWork unitOfWork,
         AgentRegistry agentRegistry,
-        AgentRoleFactory agentRoleFactory)
+        IEventBus eventBus,
+        IMediator mediator,
+        ILogger<CreateAgentCommandHandler> logger)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
         _agentRegistry = agentRegistry;
-        _agentRoleFactory = agentRoleFactory;
+        _eventBus = eventBus;
+        _mediator = mediator;
+        _logger = logger;
     }
 
     public async Task<AgentId> Handle(CreateAgentCommand request, CancellationToken cancellationToken)
     {
-        var agent = Agent.Create(new AgentName(request.Name), request.Role);
+        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title));
 
         await _repository.AddAsync(agent, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var agentInterface = _agentRoleFactory.Create(request.Role);
-        _agentRegistry.Register(agentInterface);
+        var runtimeAgent = new AgentBase(agent, _eventBus, _mediator, _logger);
+        _agentRegistry.Register(runtimeAgent);
 
-        return agent.Id;
+        return agent.AgentId;
     }
 }
