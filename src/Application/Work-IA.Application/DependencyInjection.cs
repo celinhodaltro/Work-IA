@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddTransient<TaskDelegationService>();
         services.AddScoped<MemoryRetrievalService>();
         services.AddScoped<LearningEngine>();
+        services.AddSingleton<AgentRoleFactory>();
         services.AddScoped<RoomSummaryService>();
 
         return services;

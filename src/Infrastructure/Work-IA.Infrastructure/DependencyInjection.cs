@@ -66,6 +66,9 @@ public static class DependencyInjection
         services.AddSingleton<WorkspaceAdapterFactory>();
         services.AddHostedService<OpenCodeBackgroundService>();
 
+        services.AddSingleton<IAgentInitializationService, AgentStartupService>();
+        services.AddHostedService<AgentStartupService>();
+
         return services;
     }
 }

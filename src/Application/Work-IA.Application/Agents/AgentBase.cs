@@ -25,6 +25,11 @@ public abstract class AgentBase : IAgent
         Mediator = mediator;
         Logger = logger;
     }
+
+    protected AgentBase(string name, AgentRole role, IEventBus eventBus, IMediator mediator, ILogger logger)
+        : this(Agent.Create(new AgentName(name), role), eventBus, mediator, logger)
+    {
+    }
     
     protected void RegisterObservation(string eventType, ObservationPriority priority = ObservationPriority.Medium, Func<object, bool>? condition = null)
     {
