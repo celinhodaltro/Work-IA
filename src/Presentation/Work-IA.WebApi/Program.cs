@@ -8,6 +8,7 @@ using Work_IA.Infrastructure.Persistence;
 using Work_IA.WebApi.Authorization;
 using Work_IA.WebApi.Hubs;
 using Work_IA.WebApi.Middleware;
+using Work_IA.WebApi.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,14 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new AgentIdJsonConverter());
+});
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new AgentIdJsonConverter());
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();

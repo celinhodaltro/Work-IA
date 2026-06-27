@@ -31,6 +31,14 @@
             </MudCardContent>
         </MudCard>
     </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Class="pa-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h3">@TotalCost.ToString("C4")</MudText>
+                <MudText Typo="Typo.body2">Custo Total (30d)</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
 </MudGrid>
 
 <MudText Typo="Typo.h5" Class="mt-6 mb-4">Equipe</MudText>
@@ -79,10 +87,13 @@
 @code {
     private List<AgentDto> Agents = [];
     private int OnlineCount => Agents.Count(a => a.Status == "Running");
+    private decimal TotalCost;
 
     protected override async Task OnInitializedAsync()
     {
         Agents = await AgentService.GetAgentsAsync();
+        var costs = await AgentService.GetTokenCostsAsync();
+        TotalCost = costs.Sum(c => c.TotalCost);
     }
 
     private Color GetLevelColor(int level) => level switch
