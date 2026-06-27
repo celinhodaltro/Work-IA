@@ -6,10 +6,11 @@ namespace Work_IA.Office.SignalR;
 public sealed class OfficeHubClient : IAsyncDisposable
 {
     private HubConnection? _connection;
+    private readonly CancellationTokenSource _disposeCts = new();
     public List<VisualAgent> Agents { get; } = [];
     public event Action? OnStateChanged;
 
-    public async Task ConnectAsync(string url = "http://localhost:5000/hub/agent-states")
+    public async Task ConnectAsync(string url = "http://localhost:5000/hub/agent-states", CancellationToken ct = default)
     {
         _connection = new HubConnectionBuilder()
             .WithUrl(url)
@@ -17,7 +18,8 @@ public sealed class OfficeHubClient : IAsyncDisposable
                 TimeSpan.FromSeconds(0),
                 TimeSpan.FromSeconds(2),
                 TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(10)
+                TimeSpan.FromSeconds(10),
+                TimeSpan.FromSeconds(30)
             ])
             .Build();
 
@@ -59,11 +61,46 @@ public sealed class OfficeHubClient : IAsyncDisposable
             OnStateChanged?.Invoke();
         });
 
-        await _connection.StartAsync();
+        await TryConnectWithRetryAsync(ct);
+    }
+
+    private async Task TryConnectWithRetryAsync(CancellationToken ct)
+    {
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_disposeCts.Token, ct);
+        var attempt = 0;
+
+        while (!linkedCts.Token.IsCancellationRequested)
+        {
+            try
+            {
+                await _connection!.StartAsync(linkedCts.Token);
+                return; // Conectou com sucesso!
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                Console.WriteLine($"Waiting for backend... ({ex.Message})");
+
+                attempt++;
+                var delay = TimeSpan.FromSeconds(Math.Min(30, Math.Pow(2, attempt)));
+                var jitter = Random.Shared.NextDouble() * 0.5 + 0.75; // 0.75 a 1.25
+                delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * jitter);
+
+                try
+                {
+                    await Task.Delay(delay, linkedCts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
+        _disposeCts.Cancel();
+        _disposeCts.Dispose();
         if (_connection is not null)
             await _connection.DisposeAsync();
     }
