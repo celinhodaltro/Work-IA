@@ -8,13 +8,14 @@ using Work_IA.Application.Services;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Workspace;
 using Work_IA.Domain.Workspace.Ports;
+using Work_IA.Domain.Workflows;
 using Work_IA.Infrastructure.Adapters;
 using Work_IA.Infrastructure.BackgroundServices;
 using Work_IA.Infrastructure.Communication;
 using Work_IA.Infrastructure.EventBus;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
-using Work_IA.Infrastructure.Persistence.Interceptors;
+using Work_IA.Infrastructure.Persistence.Repositories;
 using Work_IA.Infrastructure.Services;
 using Work_IA.Infrastructure.Memory;
 using Work_IA.Infrastructure.Workflows;
@@ -33,13 +34,13 @@ public static class DependencyInjection
 
         var ignorePatterns = configuration.GetSection("Workspace:IgnorePatterns").Get<List<string>>();
 
-        services.AddScoped<DispatchDomainEventsInterceptor>();
-
         services.AddDbContext<WorkIaDbContext>((sp, options) =>
             options.UseSqlite(
                 configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly(typeof(WorkIaDbContext).Assembly.FullName))
-                .AddInterceptors(sp.GetRequiredService<DispatchDomainEventsInterceptor>()));
+                b => b.MigrationsAssembly(typeof(WorkIaDbContext).Assembly.FullName)));
+
+        services.AddScoped<IAgentRepository, AgentRepository>();
+        services.AddScoped<IWorkflowRepository, WorkflowRepository>();
 
         services.AddSingleton<IEventTypeResolver>(sp =>
         {

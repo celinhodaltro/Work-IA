@@ -5,8 +5,10 @@ namespace Work_IA.Infrastructure.Persistence;
 
 public sealed class WorkIaDbContext : DbContext
 {
+    public DbSet<AgentEntity> Agents => Set<AgentEntity>();
     public DbSet<StoredEvent> StoredEvents => Set<StoredEvent>();
     public DbSet<MemoryEntryEntity> MemoryEntries => Set<MemoryEntryEntity>();
+    public DbSet<WorkflowInstanceEntity> WorkflowInstances => Set<WorkflowInstanceEntity>();
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
     public WorkIaDbContext(DbContextOptions<WorkIaDbContext> options) : base(options) { }

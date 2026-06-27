@@ -4,26 +4,26 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using Work_IA.Application.Agents;
+using Work_IA.Application.Agents.Commands;
 using Work_IA.Application.Common.Interfaces;
-using Work_IA.Application.Services;
 using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Tests;
 
-public sealed class TaskDelegationServiceTests
+public sealed class DelegateTaskCommandTests
 {
     [Fact]
-    public async Task DelegateAsync_WithNoAgent_ShouldReturnFail()
+    public async Task DelegateCommand_WithNoAgent_ShouldReturnFail()
     {
         var registry = new AgentRegistry();
-        var eventBus = new Mock<IEventBus>();
-        var service = new TaskDelegationService(registry, eventBus.Object);
-        var result = await service.DelegateAsync("Test", "Desc", AgentRole.Architect);
+        var handler = new DelegateTaskCommandHandler(registry);
+        var command = new DelegateTaskCommand("Test", "Desc", AgentRole.Architect, TaskPriority.Normal);
+        var result = await handler.Handle(command, CancellationToken.None);
         result.Success.Should().BeFalse();
     }
 
     [Fact]
-    public async Task DelegateAsync_WithAvailableAgent_ShouldReturnSuccess()
+    public async Task DelegateCommand_WithAvailableAgent_ShouldReturnSuccess()
     {
         var registry = new AgentRegistry();
         var eventBus = new Mock<IEventBus>();
@@ -32,8 +32,9 @@ public sealed class TaskDelegationServiceTests
         var agent = new TestAgent(eventBus.Object, mediator.Object, logger.Object);
         await agent.InitializeAsync();
         registry.Register(agent);
-        var service = new TaskDelegationService(registry, eventBus.Object);
-        var result = await service.DelegateAsync("Test", "Desc", AgentRole.TechLeadBackend);
+        var handler = new DelegateTaskCommandHandler(registry);
+        var command = new DelegateTaskCommand("Test", "Desc", AgentRole.TechLeadBackend, TaskPriority.Normal);
+        var result = await handler.Handle(command, CancellationToken.None);
         result.Success.Should().BeTrue();
     }
 

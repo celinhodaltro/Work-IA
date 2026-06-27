@@ -21,18 +21,15 @@ public static class DependencyInjection
         
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnitOfWorkBehavior<,>));
         
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         
         services.AddSingleton<AgentRegistry>();
-        services.AddTransient<TaskDelegationService>();
-        services.AddScoped<MemoryRetrievalService>();
-        services.AddScoped<LearningEngine>();
         services.AddSingleton<AgentRoleFactory>();
-        services.AddScoped<RoomSummaryService>();
-
+        services.AddSingleton<MetricsService>();
         services.AddScoped<AdapterManagerService>();
-
+        
         return services;
     }
 }
