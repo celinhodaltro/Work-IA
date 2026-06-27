@@ -13,7 +13,6 @@ using Work_IA.Domain.Workflows;
 using Work_IA.Infrastructure.Adapters;
 using Work_IA.Infrastructure.BackgroundServices;
 using Work_IA.Infrastructure.Communication;
-using Work_IA.Infrastructure.Configuration;
 using Work_IA.Infrastructure.EventBus;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
@@ -48,8 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.AddScoped<IWorkflowRepository, WorkflowRepository>();
         services.AddScoped<ITokenUsageRepository, TokenUsageRepository>();
-
-        services.AddSingleton<RoleDefinitionProvider>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
 
         services.AddSingleton<IEventTypeResolver>(sp =>
         {

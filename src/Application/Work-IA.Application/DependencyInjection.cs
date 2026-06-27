@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Work_IA.Application.Agents;
 using Work_IA.Application.Behaviors;
-using Work_IA.Application.Configuration;
 using Work_IA.Application.Services;
 
 namespace Work_IA.Application;
@@ -27,7 +26,6 @@ public static class DependencyInjection
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         
         services.AddSingleton<AgentRegistry>();
-        services.AddSingleton<RoleDefinitionProvider>();
         services.AddSingleton<MetricsService>();
         services.AddScoped<AdapterManagerService>();
         

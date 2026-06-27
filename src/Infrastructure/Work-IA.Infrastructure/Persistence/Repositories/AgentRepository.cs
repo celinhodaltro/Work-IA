@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Agents;
+using Work_IA.Domain.Roles;
 
 namespace Work_IA.Infrastructure.Persistence.Repositories;
 
@@ -28,7 +29,6 @@ public sealed class AgentRepository : IAgentRepository
         var entity = MapToEntity(agent);
         await _context.Set<AgentEntity>().AddAsync(entity, cancellationToken);
 
-        // Coleta eventos de domínio do aggregate para persistência e despacho
         if (agent.DomainEvents.Count > 0)
         {
             _context.EnqueueDomainEvents(agent.DomainEvents);
@@ -41,7 +41,6 @@ public sealed class AgentRepository : IAgentRepository
         var entity = MapToEntity(agent);
         _context.Set<AgentEntity>().Update(entity);
 
-        // Coleta eventos de domínio do aggregate para persistência e despacho
         if (agent.DomainEvents.Count > 0)
         {
             _context.EnqueueDomainEvents(agent.DomainEvents);
@@ -56,7 +55,6 @@ public sealed class AgentRepository : IAgentRepository
         var entity = MapToEntity(agent);
         _context.Set<AgentEntity>().Remove(entity);
 
-        // Coleta eventos de domínio do aggregate para persistência e despacho
         if (agent.DomainEvents.Count > 0)
         {
             _context.EnqueueDomainEvents(agent.DomainEvents);
@@ -124,6 +122,11 @@ public sealed class AgentRepository : IAgentRepository
             agentType.GetProperty(nameof(Agent.MentorId))!.SetValue(agent, AgentId.From(entity.MentorId.Value));
         }
 
+        if (entity.RoleId.HasValue)
+        {
+            agentType.GetProperty(nameof(Agent.RoleId))!.SetValue(agent, RoleId.From(entity.RoleId.Value));
+        }
+
         if (!string.IsNullOrEmpty(entity.SkillsJson))
         {
             var skills = JsonSerializer.Deserialize<List<SkillDto>>(entity.SkillsJson, _jsonOptions);
@@ -157,6 +160,7 @@ public sealed class AgentRepository : IAgentRepository
                 ? JsonSerializer.Serialize(agent.Skills.Select(s => new SkillDto { Name = s.Name, Proficiency = s.Proficiency }), _jsonOptions)
                 : null,
             MentorId = agent.MentorId?.Value,
+            RoleId = agent.RoleId?.Value,
             JoinedAt = agent.JoinedAt,
             LastPromotionAt = agent.LastPromotionAt,
             LastHeartbeat = agent.LastHeartbeat,

@@ -15,5 +15,6 @@ public sealed class AgentEntityConfiguration : IEntityTypeConfiguration<AgentEnt
         builder.Property(e => e.Status).IsRequired();
         builder.Property(e => e.ExperiencePoints).HasDefaultValue(0);
         builder.Property(e => e.SkillsJson).HasColumnType("TEXT");
+        builder.Property(e => e.RoleId).IsRequired(false);
     }
 }

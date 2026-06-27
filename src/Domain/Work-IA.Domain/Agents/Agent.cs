@@ -1,5 +1,6 @@
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Events;
+using Work_IA.Domain.Roles;
 
 namespace Work_IA.Domain.Agents;
 
@@ -12,6 +13,7 @@ public sealed class Agent : AggregateRoot<AgentId>
     public AgentName Name { get; private set; }
     public AgentTitle Title { get; private set; }
     public AgentCareerLevel CareerLevel { get; private set; }
+    public RoleId? RoleId { get; private set; }
     public AgentStatus Status { get; private set; }
     public int ExperiencePoints { get; private set; }
     public List<AgentSkill> Skills { get; private set; }
@@ -37,13 +39,14 @@ public sealed class Agent : AggregateRoot<AgentId>
         JoinedAt = DateTime.UtcNow;
     }
 
-    public static Agent Create(AgentName name, AgentTitle title)
+    public static Agent Create(AgentName name, AgentTitle title, RoleId? roleId = null)
     {
         var agent = new Agent(AgentId.New(), name, title, AgentCareerLevel.Intern)
         {
             Status = AgentStatus.Created,
             ExperiencePoints = 0,
             Skills = [],
+            RoleId = roleId,
             JoinedAt = DateTime.UtcNow
         };
         agent.RaiseDomainEvent(new AgentCreatedDomainEvent(agent.AgentId, name.Value, title.Value));

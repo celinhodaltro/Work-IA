@@ -39,7 +39,7 @@ public sealed class AgentsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateAgentRequest request, CancellationToken ct)
     {
         var agentId = await _mediator.Send(
-            new CreateAgentCommand(request.Name, request.Title), ct);
+            new CreateAgentCommand(request.Name, request.Title, request.RoleId), ct);
         return Ok(new { agentId = agentId.Value });
     }
 

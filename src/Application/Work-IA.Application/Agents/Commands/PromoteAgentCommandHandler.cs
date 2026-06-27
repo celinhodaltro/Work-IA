@@ -1,7 +1,6 @@
 using MediatR;
 using Work_IA.Application.Common.Exceptions;
 using Work_IA.Application.Common.Interfaces;
-using Work_IA.Application.Configuration;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Agents;
 
@@ -11,16 +10,13 @@ public sealed class PromoteAgentCommandHandler : IRequestHandler<PromoteAgentCom
 {
     private readonly IAgentRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly RoleDefinitionProvider _roleProvider;
 
     public PromoteAgentCommandHandler(
         IAgentRepository repository,
-        IUnitOfWork unitOfWork,
-        RoleDefinitionProvider roleProvider)
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
-        _roleProvider = roleProvider;
     }
 
     public async Task Handle(PromoteAgentCommand request, CancellationToken cancellationToken)
@@ -29,12 +25,24 @@ public sealed class PromoteAgentCommandHandler : IRequestHandler<PromoteAgentCom
         if (agent is null)
             throw new NotFoundException(nameof(Agent), request.AgentId.Value);
 
-        var roleDef = _roleProvider.GetByLevel(request.NewLevel);
+        var xpRequired = GetXpRequirement(request.NewLevel);
 
-        if (!agent.CanPromoteTo(request.NewLevel, roleDef?.XpRequired ?? 0))
-            throw new InvalidOperationException($"Agent {agent.Name.Value} cannot promote to {request.NewLevel}. XP: {agent.ExperiencePoints}, Required: {roleDef?.XpRequired}");
+        if (!agent.CanPromoteTo(request.NewLevel, xpRequired))
+            throw new InvalidOperationException($"Agent {agent.Name.Value} cannot promote to {request.NewLevel}. XP: {agent.ExperiencePoints}, Required: {xpRequired}");
 
         agent.Promote(new AgentTitle(request.NewTitle), request.NewLevel);
         await _repository.UpdateAsync(agent, cancellationToken);
     }
+
+    private static int GetXpRequirement(AgentCareerLevel level) => level switch
+    {
+        AgentCareerLevel.Intern => 0,
+        AgentCareerLevel.Junior => 100,
+        AgentCareerLevel.Pleno => 500,
+        AgentCareerLevel.Senior => 1000,
+        AgentCareerLevel.TechLead => 3000,
+        AgentCareerLevel.Architect => 6000,
+        AgentCareerLevel.Head => 10000,
+        _ => 0
+    };
 }
