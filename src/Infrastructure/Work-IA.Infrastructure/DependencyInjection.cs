@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
+using Work_IA.Application.Services;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Workspace;
 using Work_IA.Domain.Workspace.Ports;
@@ -50,6 +51,7 @@ public static class DependencyInjection
 
         services.AddScoped<IEventStore, EventStore>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<IAuditService, AuditService>();
         services.AddSingleton<IEventBus, InMemoryEventBus>();
         services.AddSingleton<ICommunicationBus, CommunicationBus>();
         services.AddSingleton<IFileSystemService>(new FileSystemService(workspacePath));

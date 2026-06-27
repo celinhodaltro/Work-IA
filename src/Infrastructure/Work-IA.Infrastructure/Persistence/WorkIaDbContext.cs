@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Work_IA.Application.Services;
 
 namespace Work_IA.Infrastructure.Persistence;
 
@@ -6,12 +7,25 @@ public sealed class WorkIaDbContext : DbContext
 {
     public DbSet<StoredEvent> StoredEvents => Set<StoredEvent>();
     public DbSet<MemoryEntryEntity> MemoryEntries => Set<MemoryEntryEntity>();
+    public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
     public WorkIaDbContext(DbContextOptions<WorkIaDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(WorkIaDbContext).Assembly);
+
+        modelBuilder.Entity<AuditEntry>(entity =>
+        {
+            entity.ToTable("AuditEntries");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.UserId).HasMaxLength(256);
+            entity.Property(e => e.Action).HasMaxLength(128);
+            entity.Property(e => e.ResourceType).HasMaxLength(128);
+            entity.Property(e => e.ResourceId).HasMaxLength(256);
+            entity.Property(e => e.Details).HasMaxLength(2048);
+        });
+
         base.OnModelCreating(modelBuilder);
     }
 

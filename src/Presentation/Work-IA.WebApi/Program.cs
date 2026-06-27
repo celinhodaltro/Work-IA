@@ -1,20 +1,46 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Work_IA.Application;
 using Work_IA.Application.Services;
 using Work_IA.Infrastructure;
 using Work_IA.Infrastructure.Persistence;
+using Work_IA.WebApi.Authorization;
 using Work_IA.WebApi.Hubs;
 using Work_IA.WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var jwtSecret = builder.Configuration["Jwt:SecretKey"] ?? "default-secret-key-change-me";
+var jwtKey = Encoding.UTF8.GetBytes(jwtSecret);
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(jwtKey)
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPermissionPolicies();
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<MetricsService>();
 
 var app = builder.Build();
 
@@ -30,9 +56,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
-app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
+app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseMiddleware<RateLimitingMiddleware>();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<AgentCommunicationHub>("/hub/agents");
