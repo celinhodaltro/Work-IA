@@ -2,17 +2,16 @@ using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var cache = builder.AddRedis("cache")
+var redis = builder.AddRedis("cache")
     .WithImage("redis", "7-alpine");
 
-var eventBus = builder.AddRabbitMQ("eventbus")
+var rabbitMq = builder.AddRabbitMQ("eventbus")
     .WithImage("rabbitmq", "3-management-alpine");
 
 var webApi = builder.AddProject<Projects.Work_IA_WebApi>("webapi")
-    .WithReference(cache)
-    .WithReference(eventBus)
-    .WithEnvironment("ConnectionStrings__DefaultConnection", "Data Source=/data/workia.db")
-    .WithEnvironment("EventBus__Provider", "InMemory")
+    .WithReference(redis)
+    .WithReference(rabbitMq)
+    .WithEnvironment("ConnectionStrings__DefaultConnection", "Data Source=workia.db")
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();
