@@ -11,6 +11,8 @@ using Work_IA.WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 var jwtSecret = builder.Configuration["Jwt:SecretKey"] ?? "default-secret-key-change-me";
 var jwtKey = Encoding.UTF8.GetBytes(jwtSecret);
 
@@ -44,6 +46,8 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+app.MapDefaultEndpoints();
+
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<WorkIaDbContext>();
@@ -63,5 +67,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<AgentCommunicationHub>("/hub/agents");
+app.UseBlazorFrameworkFiles();
+app.MapFallbackToFile("index.html");
 
 app.Run();

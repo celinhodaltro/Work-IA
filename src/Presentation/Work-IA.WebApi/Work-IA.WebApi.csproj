@@ -11,6 +11,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.28" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Aspire\Work-IA.ServiceDefaults\Work-IA.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Work-IA.BlazorDashboard\Work-IA.BlazorDashboard.csproj" />
   </ItemGroup>
 </Project>
