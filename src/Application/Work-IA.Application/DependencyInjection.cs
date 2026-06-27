@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Work_IA.Application.Behaviors;
+using Work_IA.Application.Services;
 
 namespace Work_IA.Application;
 
@@ -21,6 +22,9 @@ public static class DependencyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+        services.AddScoped<MemoryRetrievalService>();
+        services.AddScoped<LearningEngine>();
 
         return services;
     }

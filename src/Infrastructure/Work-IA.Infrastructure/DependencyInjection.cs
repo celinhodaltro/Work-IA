@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Infrastructure.EventBus;
+using Work_IA.Infrastructure.Memory;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
 using Work_IA.Infrastructure.Persistence.Interceptors;
@@ -37,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<IEventStore, EventStore>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddSingleton<IEventBus, InMemoryEventBus>();
+        services.AddScoped<IMemoryStore, DatabaseMemoryStore>();
 
         return services;
     }
