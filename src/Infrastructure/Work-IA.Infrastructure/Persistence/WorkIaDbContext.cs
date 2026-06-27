@@ -4,6 +4,8 @@ namespace Work_IA.Infrastructure.Persistence;
 
 public sealed class WorkIaDbContext : DbContext
 {
+    public DbSet<StoredEvent> StoredEvents => Set<StoredEvent>();
+
     public WorkIaDbContext(DbContextOptions<WorkIaDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
