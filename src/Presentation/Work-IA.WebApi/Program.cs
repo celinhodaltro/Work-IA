@@ -2,7 +2,6 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Work_IA.Application;
-using Work_IA.Application.Services;
 using Work_IA.Infrastructure;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.WebApi.Authorization;
@@ -57,6 +56,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 
+// CORS - permitir qualquer origem em desenvolvimento
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
@@ -73,13 +81,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<RateLimitingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// MAPEAR ROTAS PRIMEIRO
 app.MapControllers();
 app.MapHub<AgentCommunicationHub>("/hub/agents");
+
+// DEPOIS servir arquivos estáticos (fallback)
 app.UseBlazorFrameworkFiles();
 app.MapFallbackToFile("index.html");
 
