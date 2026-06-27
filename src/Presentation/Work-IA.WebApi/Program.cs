@@ -1,7 +1,9 @@
 using Work_IA.Application;
+using Work_IA.Application.Services;
 using Work_IA.Infrastructure;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.WebApi.Hubs;
+using Work_IA.WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<MetricsService>();
 
 var app = builder.Build();
 
@@ -27,6 +30,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
