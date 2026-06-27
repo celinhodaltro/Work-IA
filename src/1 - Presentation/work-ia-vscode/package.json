@@ -1,0 +1,63 @@
+{
+  "name": "work-ia-vscode",
+  "displayName": "AI Office OS",
+  "description": "AI Office OS - Multi-agent engineering team in VS Code",
+  "version": "0.1.0",
+  "publisher": "celinhodaltro",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "work-ia.openDashboard",
+        "title": "AI Office OS: Open Dashboard"
+      },
+      {
+        "command": "work-ia.showAgents",
+        "title": "AI Office OS: Show Agents"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "work-ia-sidebar",
+          "title": "AI Office OS",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "work-ia-sidebar": [
+        {
+          "id": "work-ia.agentsView",
+          "name": "Agents"
+        },
+        {
+          "id": "work-ia.activityView",
+          "name": "Activity"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "@types/vscode": "^1.125.0",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^10.0.0"
+  }
+}
