@@ -59,7 +59,7 @@ public sealed class RoleRepository : IRoleRepository
 
     private static RoleDefinition MapToDomain(RoleEntity e)
     {
-        return RoleDefinition.Create(
+        return RoleDefinition.Hydrate(
             e.Name,
             JsonSerializer.Deserialize<List<string>>(e.TechnologiesJson, JsonOpts) ?? [],
             JsonSerializer.Deserialize<List<string>>(e.MethodologiesJson, JsonOpts) ?? [],

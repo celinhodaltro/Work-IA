@@ -27,6 +27,19 @@ public sealed class RoleDefinition : AggregateRoot<RoleId>
         return role;
     }
 
+    public static RoleDefinition Hydrate(string name, List<string>? technologies = null, List<string>? methodologies = null, List<string>? tools = null)
+    {
+        var role = new RoleDefinition
+        {
+            RoleId = RoleId.New(),
+            Name = name,
+            Technologies = technologies ?? [],
+            Methodologies = methodologies ?? [],
+            Tools = tools ?? []
+        };
+        return role;
+    }
+
     public void AddTechnology(string tech)
     {
         if (!Technologies.Contains(tech))

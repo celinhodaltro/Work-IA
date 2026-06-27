@@ -96,6 +96,7 @@ public static class DependencyInjection
 
         services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
         services.AddHostedService<WorkflowStartupService>();
+        services.AddHostedService<RoleSeedService>();
 
         return services;
     }
