@@ -16,6 +16,7 @@ using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
 using Work_IA.Infrastructure.Persistence.Interceptors;
 using Work_IA.Infrastructure.Services;
+using Work_IA.Infrastructure.Memory;
 using Work_IA.Infrastructure.Workflows;
 using Work_IA.Infrastructure.Workspace;
 
@@ -50,6 +51,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IEventStore, EventStore>();
+        services.AddScoped<IMemoryStore, DatabaseMemoryStore>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddSingleton<IEventBus, InMemoryEventBus>();
