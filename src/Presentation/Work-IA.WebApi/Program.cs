@@ -14,7 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-var jwtSecret = builder.Configuration["Jwt:SecretKey"] ?? "default-secret-key-change-me";
+var jwtSecret = builder.Configuration["Jwt:SecretKey"];
+if (string.IsNullOrEmpty(jwtSecret) || jwtSecret == "default-secret-key-change-me")
+{
+    throw new InvalidOperationException("JWT Secret must be configured and not the default value.");
+}
 var jwtKey = Encoding.UTF8.GetBytes(jwtSecret);
 
 builder.Services.AddApplication();

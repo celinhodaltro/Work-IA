@@ -1,0 +1,44 @@
+{
+  "name": "work-ia-vscode",
+  "displayName": "AI Office OS",
+  "description": "Visualize and manage your AI engineering team",
+  "version": "1.0.0",
+  "publisher": "celinhodaltro",
+  "license": "MIT",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Visualization", "Other"],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "icon": "media/icon.png",
+  "contributes": {
+    "commands": [
+      { "command": "work-ia.openDashboard", "title": "AI Office OS: Open Dashboard" },
+      { "command": "work-ia.hireAgent", "title": "AI Office OS: Hire Agent" }
+    ],
+    "viewsContainers": {
+      "activitybar": [{
+        "id": "work-ia-sidebar",
+        "title": "AI Office OS",
+        "icon": "media/icon.svg"
+      }]
+    },
+    "views": {
+      "work-ia-sidebar": [
+        { "id": "work-ia.agentsView", "name": "Agents" }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^8.0.0"
+  }
+}
