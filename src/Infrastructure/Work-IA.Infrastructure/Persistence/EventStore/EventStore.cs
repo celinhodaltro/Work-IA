@@ -34,7 +34,6 @@ public sealed class EventStore : IEventStore
         };
 
         await _context.StoredEvents.AddAsync(storedEvent, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<IDomainEvent>> GetByAggregateIdAsync(Guid aggregateId, CancellationToken cancellationToken = default)

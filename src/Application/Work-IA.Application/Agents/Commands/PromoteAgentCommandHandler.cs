@@ -36,6 +36,5 @@ public sealed class PromoteAgentCommandHandler : IRequestHandler<PromoteAgentCom
 
         agent.Promote(new AgentTitle(request.NewTitle), request.NewLevel);
         await _repository.UpdateAsync(agent, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

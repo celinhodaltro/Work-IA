@@ -31,6 +31,5 @@ public sealed class CancelWorkflowCommandHandler : IRequestHandler<CancelWorkflo
         instance.Cancel();
 
         await _repository.UpdateAsync(instance, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

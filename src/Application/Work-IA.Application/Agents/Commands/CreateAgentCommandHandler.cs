@@ -37,7 +37,6 @@ public sealed class CreateAgentCommandHandler : IRequestHandler<CreateAgentComma
         var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title));
 
         await _repository.AddAsync(agent, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var runtimeAgent = new AgentBase(agent, _eventBus, _mediator, _logger);
         _agentRegistry.Register(runtimeAgent);

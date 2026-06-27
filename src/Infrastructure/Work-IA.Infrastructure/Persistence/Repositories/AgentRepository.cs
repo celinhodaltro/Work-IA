@@ -27,12 +27,27 @@ public sealed class AgentRepository : IAgentRepository
     {
         var entity = MapToEntity(agent);
         await _context.Set<AgentEntity>().AddAsync(entity, cancellationToken);
+
+        // Coleta eventos de domínio do aggregate para persistência e despacho
+        if (agent.DomainEvents.Count > 0)
+        {
+            _context.EnqueueDomainEvents(agent.DomainEvents);
+            agent.ClearDomainEvents();
+        }
     }
 
     public Task UpdateAsync(Agent agent, CancellationToken cancellationToken = default)
     {
         var entity = MapToEntity(agent);
         _context.Set<AgentEntity>().Update(entity);
+
+        // Coleta eventos de domínio do aggregate para persistência e despacho
+        if (agent.DomainEvents.Count > 0)
+        {
+            _context.EnqueueDomainEvents(agent.DomainEvents);
+            agent.ClearDomainEvents();
+        }
+
         return Task.CompletedTask;
     }
 
@@ -40,6 +55,14 @@ public sealed class AgentRepository : IAgentRepository
     {
         var entity = MapToEntity(agent);
         _context.Set<AgentEntity>().Remove(entity);
+
+        // Coleta eventos de domínio do aggregate para persistência e despacho
+        if (agent.DomainEvents.Count > 0)
+        {
+            _context.EnqueueDomainEvents(agent.DomainEvents);
+            agent.ClearDomainEvents();
+        }
+
         return Task.CompletedTask;
     }
 

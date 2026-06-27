@@ -23,8 +23,6 @@ public sealed class ExecuteWorkflowCommandHandler : IRequestHandler<ExecuteWorkf
             request.Context,
             cancellationToken);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
         return instance;
     }
 }

@@ -33,6 +33,5 @@ public sealed class UpdateMemoryCommandHandler : IRequestHandler<UpdateMemoryCom
         }
 
         await _memoryStore.SaveAsync(entry, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

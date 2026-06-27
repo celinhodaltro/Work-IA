@@ -1,6 +1,6 @@
 namespace Work_IA.Domain.Abstractions;
 
-public abstract class AggregateRoot<TId> : Entity<TId>
+public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
     where TId : struct, IEquatable<TId>
 {
     private int _version;

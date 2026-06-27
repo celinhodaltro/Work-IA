@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Work_IA.Application.Common.Interfaces;
 using Work_IA.Application.Services;
+using Work_IA.Domain.Abstractions;
 
 namespace Work_IA.Infrastructure.Persistence;
 
-public sealed class WorkIaDbContext : DbContext
+public sealed class WorkIaDbContext : DbContext, IUnitOfWork
 {
+    private readonly List<IDomainEvent> _pendingEvents = [];
+
     public DbSet<AgentEntity> Agents => Set<AgentEntity>();
     public DbSet<StoredEvent> StoredEvents => Set<StoredEvent>();
     public DbSet<MemoryEntryEntity> MemoryEntries => Set<MemoryEntryEntity>();
@@ -12,6 +16,35 @@ public sealed class WorkIaDbContext : DbContext
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
     public WorkIaDbContext(DbContextOptions<WorkIaDbContext> options) : base(options) { }
+
+    /// <summary>
+    /// Registra um evento de domínio para ser persistido como StoredEvent e posteriormente despachado.
+    /// </summary>
+    internal void EnqueueDomainEvent(IDomainEvent domainEvent)
+    {
+        _pendingEvents.Add(domainEvent);
+    }
+
+    /// <summary>
+    /// Registra múltiplos eventos de domínio de uma vez.
+    /// </summary>
+    internal void EnqueueDomainEvents(IEnumerable<IDomainEvent> domainEvents)
+    {
+        _pendingEvents.AddRange(domainEvents);
+    }
+
+    /// <summary>
+    /// IUnitOfWork: Retorna os eventos pendentes e limpa a lista interna.
+    /// Chamado pelo UnitOfWorkBehavior ANTES de SaveChangesAsync e DispatchAsync.
+    /// O DomainEventDispatcher.DispatchAsync adiciona StoredEvent ao DbSet via EventStore,
+    /// e o SaveChangesAsync posterior persiste tudo (entidades + StoredEvents) em uma transação.
+    /// </summary>
+    Task<IReadOnlyList<IDomainEvent>> IUnitOfWork.GetAndClearDomainEventsAsync(CancellationToken cancellationToken)
+    {
+        var events = _pendingEvents.ToList().AsReadOnly();
+        _pendingEvents.Clear();
+        return Task.FromResult<IReadOnlyList<IDomainEvent>>(events);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

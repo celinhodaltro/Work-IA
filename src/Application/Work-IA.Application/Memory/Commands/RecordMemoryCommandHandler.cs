@@ -26,7 +26,6 @@ public sealed class RecordMemoryCommandHandler : IRequestHandler<RecordMemoryCom
             request.AgentId);
 
         await _memoryStore.SaveAsync(entry, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entry.Id;
     }

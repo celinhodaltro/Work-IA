@@ -25,6 +25,5 @@ public sealed class AddExperienceCommandHandler : IRequestHandler<AddExperienceC
 
         agent.AddExperience(request.Points);
         await _repository.UpdateAsync(agent, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

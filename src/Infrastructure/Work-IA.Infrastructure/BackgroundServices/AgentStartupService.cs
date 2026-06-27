@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Agents;
@@ -11,34 +12,34 @@ namespace Work_IA.Infrastructure.BackgroundServices;
 public sealed class AgentStartupService : BackgroundService, IAgentInitializationService
 {
     private readonly AgentRegistry _registry;
-    private readonly IAgentRepository _repository;
-    private readonly IEventBus _eventBus;
-    private readonly IMediator _mediator;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<AgentStartupService> _logger;
 
     public AgentStartupService(
         AgentRegistry registry,
-        IAgentRepository repository,
-        IEventBus eventBus,
-        IMediator mediator,
+        IServiceScopeFactory scopeFactory,
         ILogger<AgentStartupService> logger)
     {
         _registry = registry;
-        _repository = repository;
-        _eventBus = eventBus;
-        _mediator = mediator;
+        _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
     public async Task InitializeAllAgentsAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Loading existing agents from database...");
+        using var scope = _scopeFactory.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
 
-        var agents = await _repository.GetAllAsync(cancellationToken);
+        var repository = serviceProvider.GetRequiredService<IAgentRepository>();
+        var eventBus = serviceProvider.GetRequiredService<IEventBus>();
+        var mediator = serviceProvider.GetRequiredService<IMediator>();
+
+        _logger.LogInformation("Loading existing agents from database...");
+        var agents = await repository.GetAllAsync(cancellationToken);
 
         foreach (var agent in agents)
         {
-            var runtimeAgent = new AgentBase(agent, _eventBus, _mediator, _logger);
+            var runtimeAgent = new AgentBase(agent, eventBus, mediator, _logger);
             _registry.Register(runtimeAgent);
             _logger.LogInformation("Agent {Name} loaded and registered", agent.Name.Value);
         }
@@ -48,6 +49,8 @@ public sealed class AgentStartupService : BackgroundService, IAgentInitializatio
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Starting agent workforce...");
         await InitializeAllAgentsAsync(stoppingToken);
+        _logger.LogInformation("Agent workforce ready with {Count} agents", _registry.Count);
     }
 }

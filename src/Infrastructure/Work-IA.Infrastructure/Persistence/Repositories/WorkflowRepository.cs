@@ -26,12 +26,27 @@ public sealed class WorkflowRepository : IWorkflowRepository
     {
         var entity = MapToEntity(instance);
         await _context.Set<WorkflowInstanceEntity>().AddAsync(entity, cancellationToken);
+
+        // Coleta eventos de domínio do aggregate para persistência e despacho
+        if (instance.DomainEvents.Count > 0)
+        {
+            _context.EnqueueDomainEvents(instance.DomainEvents);
+            instance.ClearDomainEvents();
+        }
     }
 
     public Task UpdateAsync(WorkflowInstance instance, CancellationToken cancellationToken = default)
     {
         var entity = MapToEntity(instance);
         _context.Set<WorkflowInstanceEntity>().Update(entity);
+
+        // Coleta eventos de domínio do aggregate para persistência e despacho
+        if (instance.DomainEvents.Count > 0)
+        {
+            _context.EnqueueDomainEvents(instance.DomainEvents);
+            instance.ClearDomainEvents();
+        }
+
         return Task.CompletedTask;
     }
 
@@ -39,6 +54,14 @@ public sealed class WorkflowRepository : IWorkflowRepository
     {
         var entity = MapToEntity(instance);
         _context.Set<WorkflowInstanceEntity>().Remove(entity);
+
+        // Coleta eventos de domínio do aggregate para persistência e despacho
+        if (instance.DomainEvents.Count > 0)
+        {
+            _context.EnqueueDomainEvents(instance.DomainEvents);
+            instance.ClearDomainEvents();
+        }
+
         return Task.CompletedTask;
     }
 

@@ -41,6 +41,9 @@ public static class DependencyInjection
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(WorkIaDbContext).Assembly.FullName)));
 
+        // IUnitOfWork aponta para o DbContext (EF Core DbContext é o Unit of Work)
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<WorkIaDbContext>());
+
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.AddScoped<IWorkflowRepository, WorkflowRepository>();
 

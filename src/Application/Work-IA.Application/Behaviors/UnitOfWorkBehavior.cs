@@ -26,7 +26,14 @@ public sealed class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavior<
 
         var response = await next();
 
-        await _unitOfWork.DispatchDomainEventsAsync(cancellationToken);
+        // 1. Coleta eventos pendentes registrados pelos repositórios
+        var domainEvents = await _unitOfWork.GetAndClearDomainEventsAsync(cancellationToken);
+
+        // 2. Despacha eventos (EventStore adiciona StoredEvent ao DbSet + MediatR publica)
+        if (domainEvents.Count > 0)
+            await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
+
+        // 3. Persiste TUDO (entidades + StoredEvents) em uma única transação
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return response;
