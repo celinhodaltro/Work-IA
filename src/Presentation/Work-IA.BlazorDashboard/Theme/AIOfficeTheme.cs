@@ -61,12 +61,18 @@ public sealed class AIOfficeTheme
         {
             Elevation = new string[]
             {
-                "none",
-                "0 1px 3px rgba(0,0,0,0.12)",
-                "0 3px 6px rgba(0,0,0,0.15)",
-                "0 6px 12px rgba(0,0,0,0.18)",
-                "0 8px 16px rgba(0,0,0,0.20)",
-                "0 12px 24px rgba(0,0,0,0.22)"
+                "none",                                           // 0
+                "0 1px 3px rgba(0,0,0,0.12)",                    // 1
+                "0 3px 6px rgba(0,0,0,0.15)",                    // 2
+                "0 6px 12px rgba(0,0,0,0.18)",                   // 3
+                "0 8px 16px rgba(0,0,0,0.20)",                   // 4
+                "0 12px 24px rgba(0,0,0,0.22)",                   // 5
+                string.Empty, string.Empty, string.Empty,          // 6,7,8
+                string.Empty, string.Empty, string.Empty,          // 9,10,11
+                string.Empty, string.Empty, string.Empty,          // 12,13,14
+                string.Empty, string.Empty, string.Empty,          // 15,16,17
+                string.Empty, string.Empty, string.Empty,          // 18,19,20
+                string.Empty, string.Empty, string.Empty, string.Empty // 21,22,23,24
             }
         },
         LayoutProperties = new LayoutProperties()
