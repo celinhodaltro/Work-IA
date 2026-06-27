@@ -5,24 +5,33 @@ namespace Work_IA.Office.Models;
 
 public sealed class OrbitCamera
 {
-    public float Distance { get; private set; } = 800;
+    private float _targetDistance = 800;
+    private float _currentDistance = 800;
     public float Yaw { get; private set; }
     public float Pitch { get; private set; } = 30;
-    public float TargetX { get; set; }
-    public float TargetY { get; set; }
-    public float TargetZ { get; set; }
+    public float TargetX { get; private set; }
+    public float TargetY { get; private set; }
+    public float TargetZ { get; private set; }
 
     private float _prevMouseX, _prevMouseY;
     private bool _isRotating, _isPanning;
+
+    public void Update(float deltaTime)
+    {
+        var speed = 5f * deltaTime;
+        _currentDistance += (_targetDistance - _currentDistance) * Math.Clamp(speed, 0, 1);
+    }
+
+    public float Distance => _currentDistance;
 
     public Matrix4X4<float> GetViewMatrix()
     {
         var yawRad = Yaw * MathF.PI / 180;
         var pitchRad = Pitch * MathF.PI / 180;
         var cosPitch = MathF.Cos(pitchRad);
-        var x = Distance * cosPitch * MathF.Sin(yawRad);
-        var y = Distance * MathF.Sin(pitchRad);
-        var z = Distance * cosPitch * MathF.Cos(yawRad);
+        var x = _currentDistance * cosPitch * MathF.Sin(yawRad);
+        var y = _currentDistance * MathF.Sin(pitchRad);
+        var z = _currentDistance * cosPitch * MathF.Cos(yawRad);
         var eye = new Vector3D<float>(TargetX + x, TargetY + y, TargetZ + z);
         var target = new Vector3D<float>(TargetX, TargetY, TargetZ);
         return Matrix4X4.CreateLookAt(eye, target, Vector3D<float>.UnitY);
@@ -36,61 +45,57 @@ public sealed class OrbitCamera
 
     public void HandleMouse(IMouse mouse)
     {
+        var currentX = mouse.Position.X;
+        var currentY = mouse.Position.Y;
+
         if (mouse.IsButtonPressed(MouseButton.Right))
         {
+            if (!_isRotating && !_isPanning)
+            {
+                _prevMouseX = currentX;
+                _prevMouseY = currentY;
+            }
             _isRotating = true;
             _isPanning = false;
-            _prevMouseX = mouse.Position.X;
-            _prevMouseY = mouse.Position.Y;
+            var dx = currentX - _prevMouseX;
+            var dy = currentY - _prevMouseY;
+            Yaw += dx * 0.2f;
+            Pitch = Math.Clamp(Pitch - dy * 0.2f, -89, 89);
+            _prevMouseX = currentX;
+            _prevMouseY = currentY;
         }
         else if (mouse.IsButtonPressed(MouseButton.Middle))
         {
+            if (!_isPanning && !_isRotating)
+            {
+                _prevMouseX = currentX;
+                _prevMouseY = currentY;
+            }
             _isPanning = true;
             _isRotating = false;
-            _prevMouseX = mouse.Position.X;
-            _prevMouseY = mouse.Position.Y;
+            var dx = currentX - _prevMouseX;
+            var dy = currentY - _prevMouseY;
+            var yawRad = Yaw * MathF.PI / 180;
+            var factor = _currentDistance * 0.0015f;
+            TargetX += (-MathF.Cos(yawRad) * dx - MathF.Sin(yawRad) * dy) * factor;
+            TargetZ += (MathF.Sin(yawRad) * dx - MathF.Cos(yawRad) * dy) * factor;
+            _prevMouseX = currentX;
+            _prevMouseY = currentY;
         }
         else
         {
             _isRotating = false;
             _isPanning = false;
         }
-
-        if (_isRotating)
-        {
-            var dx = mouse.Position.X - _prevMouseX;
-            var dy = mouse.Position.Y - _prevMouseY;
-            Yaw += dx * 0.3f;
-            Pitch = Math.Clamp(Pitch - dy * 0.3f, -89, 89);
-            _prevMouseX = mouse.Position.X;
-            _prevMouseY = mouse.Position.Y;
-        }
-        else if (_isPanning)
-        {
-            var dx = mouse.Position.X - _prevMouseX;
-            var dy = mouse.Position.Y - _prevMouseY;
-
-            var yawRad = Yaw * MathF.PI / 180;
-            var pitchRad = Pitch * MathF.PI / 180;
-            var cosPitch = MathF.Cos(pitchRad);
-            var rightX = MathF.Cos(yawRad);
-            var rightZ = -MathF.Sin(yawRad);
-            var upX = -MathF.Sin(pitchRad) * MathF.Sin(yawRad);
-            var upY = cosPitch;
-            var upZ = -MathF.Sin(pitchRad) * MathF.Cos(yawRad);
-            var speed = Distance * 0.002f;
-
-            TargetX += (-rightX * dx + upX * dy) * speed;
-            TargetY += (upY * dy) * speed;
-            TargetZ += (-rightZ * dx + upZ * dy) * speed;
-
-            _prevMouseX = mouse.Position.X;
-            _prevMouseY = mouse.Position.Y;
-        }
     }
 
     public void HandleScroll(float delta)
     {
-        Distance = Math.Clamp(Distance - delta * 50, 50, 3000);
+        _targetDistance = Math.Clamp(_targetDistance - delta * 20, 50, 3000);
     }
+
+    public void MoveW(float amount) { TargetZ += amount; }
+    public void MoveS(float amount) { TargetZ -= amount; }
+    public void MoveA(float amount) { TargetX -= amount; }
+    public void MoveD(float amount) { TargetX += amount; }
 }

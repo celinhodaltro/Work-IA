@@ -18,6 +18,8 @@ public sealed class OfficeRenderer : IDisposable
     private uint _shader;
     private int _officeVertexCount;
 
+    private IInputContext? _input;
+
     private const string Vshader = @"
 #version 330 core
 layout(location = 0) in vec3 aPos;
@@ -59,6 +61,16 @@ void main() {
         gl.ClearColor(0.08f, 0.08f, 0.1f, 1.0f);
         gl.Enable(EnableCap.DepthTest);
         BuildOffice();
+    }
+
+    public void SetInput(IInputContext input)
+    {
+        _input = input;
+        if (input.Mice.Count > 0)
+        {
+            var mouse = input.Mice[0];
+            mouse.Scroll += (_, scroll) => _camera.HandleScroll(scroll.Y);
+        }
     }
 
     private void SetupShaders()
@@ -216,24 +228,19 @@ void main() {
 
     public void HandleInput(IInputContext input)
     {
-        if (input.Mice.Count > 0)
-        {
-            var mouse = input.Mice[0];
-            _camera.HandleMouse(mouse);
-            mouse.Scroll += (_, scroll) => _camera.HandleScroll(scroll.Y);
-        }
         if (input.Keyboards.Count > 0)
         {
             var kb = input.Keyboards[0];
-            if (kb.IsKeyPressed(Key.W)) _camera.TargetZ -= 10;
-            if (kb.IsKeyPressed(Key.S)) _camera.TargetZ += 10;
-            if (kb.IsKeyPressed(Key.A)) _camera.TargetX -= 10;
-            if (kb.IsKeyPressed(Key.D)) _camera.TargetX += 10;
+            if (kb.IsKeyPressed(Key.W)) _camera.MoveS(10);
+            if (kb.IsKeyPressed(Key.S)) _camera.MoveW(10);
+            if (kb.IsKeyPressed(Key.A)) _camera.MoveA(10);
+            if (kb.IsKeyPressed(Key.D)) _camera.MoveD(10);
         }
     }
 
     public void Update(float deltaTime)
     {
+        _camera.Update(deltaTime);
         _time += deltaTime;
         foreach (var agent in _hub.Agents)
             agent.Update(deltaTime);

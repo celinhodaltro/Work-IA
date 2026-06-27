@@ -27,6 +27,7 @@ public static class Program
             var gl = GL.GetApi(window);
             renderer = new OfficeRenderer(gl, hubClient, window.Size);
             input = window.CreateInput();
+            renderer.SetInput(input);
             await hubClient.ConnectAsync();
         };
 
