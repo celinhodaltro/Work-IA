@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -12,44 +11,35 @@ public static class Program
 {
     public static async Task Main()
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false)
-            .Build();
-
-        var hubUrl = config["SignalR:HubUrl"] ?? "http://localhost:5000/hub/agent-states";
         var hubClient = new OfficeHubClient();
-
         var options = WindowOptions.Default;
         options.Size = new Vector2D<int>(1280, 720);
-        options.Title = "AI Office OS - Escritório";
+        options.Title = "AI Office OS";
         options.PreferredDepthBufferBits = 24;
+        options.API = GraphicsAPI.Default;
 
         var window = Window.Create(options);
-
         OfficeRenderer? renderer = null;
 
         window.Load += async () =>
         {
             var gl = GL.GetApi(window);
             renderer = new OfficeRenderer(gl, hubClient, window.Size);
-            await hubClient.ConnectAsync(hubUrl);
+            var input = window.CreateInput();
+            input.Mice[0].Scroll += (_, scroll) => { };
+            await hubClient.ConnectAsync();
         };
 
-        window.Update += (deltaTime) =>
+        window.Update += (delta) =>
         {
-            renderer?.Update((float)deltaTime);
+            var input = window.CreateInput();
+            renderer?.HandleInput(input);
+            renderer?.Update((float)delta);
         };
 
-        window.Render += (deltaTime) =>
-        {
-            renderer?.Render((float)deltaTime);
-        };
+        window.Render += (_) => renderer?.Render();
 
-        window.Resize += (size) =>
-        {
-            renderer?.Resize(size);
-        };
+        window.Resize += (size) => renderer?.Resize(size);
 
         window.Run();
         await hubClient.DisposeAsync();
