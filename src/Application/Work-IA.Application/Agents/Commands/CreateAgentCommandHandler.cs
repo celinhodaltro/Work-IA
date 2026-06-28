@@ -1,10 +1,10 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Agents;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Agents;
-using Work_IA.Domain.Roles;
+using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Agents.Commands;
 

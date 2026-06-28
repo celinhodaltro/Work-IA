@@ -1,7 +1,7 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Work_IA.Domain.Abstractions;
-using Work_IA.Domain.Roles;
+using Work_IA.Domain.Agents;
 
 namespace Work_IA.Infrastructure.Persistence.Repositories;
 

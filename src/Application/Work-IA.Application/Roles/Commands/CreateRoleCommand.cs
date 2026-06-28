@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 using Work_IA.Application.Behaviors;
-using Work_IA.Domain.Roles;
+using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Roles.Commands;
 

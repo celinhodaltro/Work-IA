@@ -1,6 +1,6 @@
-using Work_IA.Domain.Abstractions;
+﻿using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Events;
-using Work_IA.Domain.Roles;
+using Work_IA.Domain.Agents;
 
 namespace Work_IA.Domain.Agents;
 
@@ -138,3 +138,4 @@ public sealed class Agent : AggregateRoot<AgentId>
                             LastHeartbeat.HasValue &&
                             (DateTime.UtcNow - LastHeartbeat.Value).TotalMinutes < 5;
 }
+

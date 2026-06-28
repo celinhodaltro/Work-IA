@@ -1,8 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Work_IA.Domain.Abstractions;
-using Work_IA.Domain.Roles;
+using Work_IA.Domain.Agents;
 
 namespace Work_IA.Infrastructure.BackgroundServices;
 
@@ -137,7 +137,7 @@ public sealed class RoleSeedService : IHostedService
                 "C#", ".NET", "ASP.NET Core", "Docker", "Kubernetes", "RabbitMQ", "MassTransit", "Redis", "PostgreSQL"
             ],
             [
-                "Microservices", "Event Driven Architecture", "Saga Pattern", "Outbox Pattern", "Idempotência", "Circuit Breaker", "Retry Policy"
+                "Microservices", "Event Driven Architecture", "Saga Pattern", "Outbox Pattern", "IdempotÃªncia", "Circuit Breaker", "Retry Policy"
             ],
             [
                 "Docker", "Kubernetes", "Seq", "Grafana", "Prometheus", "OpenTelemetry", "Azure Service Bus"
@@ -148,7 +148,7 @@ public sealed class RoleSeedService : IHostedService
                 "C#", ".NET", "Entity Framework Core", "SQL", "PostgreSQL", "SQL Server"
             ],
             [
-                "Code First", "Migrations", "Performance SQL", "Índices", "N+1 Query Prevention"
+                "Code First", "Migrations", "Performance SQL", "Ãndices", "N+1 Query Prevention"
             ],
             [
                 "Visual Studio", "SSMS", "PgAdmin", "Azure Data Studio"
@@ -159,7 +159,7 @@ public sealed class RoleSeedService : IHostedService
                 "SQL", "T-SQL", "PL/pgSQL", "PostgreSQL", "SQL Server"
             ],
             [
-                "Query Optimization", "Índices", "Stored Procedures", "CTE", "Window Functions"
+                "Query Optimization", "Ãndices", "Stored Procedures", "CTE", "Window Functions"
             ],
             [
                 "SSMS", "PgAdmin", "DBeaver", "Azure Data Studio"
@@ -269,7 +269,7 @@ public sealed class RoleSeedService : IHostedService
                 "C#", ".NET", "SQL"
             ],
             [
-                "Testes Unitários", "Testes de Integração", "Testes E2E", "BDD", "TDD", "Cobertura de Código"
+                "Testes UnitÃ¡rios", "Testes de IntegraÃ§Ã£o", "Testes E2E", "BDD", "TDD", "Cobertura de CÃ³digo"
             ],
             [
                 "xUnit", "NUnit", "Moq", "FluentAssertions", "Playwright", "Selenium", "Testcontainers"
@@ -280,7 +280,7 @@ public sealed class RoleSeedService : IHostedService
                 "Markdown", "YAML", "JSON"
             ],
             [
-                "Documentação Técnica", "ADR", "API Documentation", "Wiki"
+                "DocumentaÃ§Ã£o TÃ©cnica", "ADR", "API Documentation", "Wiki"
             ],
             [
                 "Swagger", "GitHub Wiki", "Notion", "Obsidian", "Docusaurus"

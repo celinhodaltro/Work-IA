@@ -1,4 +1,4 @@
-using Work_IA.Domain.Roles;
+﻿using Work_IA.Domain.Agents;
 
 namespace Work_IA.Domain.Abstractions;
 
@@ -9,3 +9,4 @@ public interface IRoleRepository
     Task AddAsync(RoleDefinition role, CancellationToken ct = default);
     Task UpdateAsync(RoleDefinition role, CancellationToken ct = default);
 }
+
