@@ -47,7 +47,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.AddScoped<IWorkflowRepository, WorkflowRepository>();
-        services.AddScoped<ITokenUsageRepository, TokenUsageRepository>(); services.AddScoped<IBoardRepository, BoardRepository>();
+        services.AddScoped<ITokenUsageRepository, TokenUsageRepository>(); services.AddScoped<IBoardRepository, BoardRepository>(); services.AddScoped<IMeetingRepository, MeetingRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
 
         services.AddSingleton<IEventTypeResolver>(sp =>

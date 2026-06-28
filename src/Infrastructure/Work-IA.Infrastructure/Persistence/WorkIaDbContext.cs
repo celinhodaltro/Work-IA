@@ -14,7 +14,7 @@ public sealed class WorkIaDbContext : DbContext, IUnitOfWork
     public DbSet<MemoryEntryEntity> MemoryEntries => Set<MemoryEntryEntity>();
     public DbSet<WorkflowInstanceEntity> WorkflowInstances => Set<WorkflowInstanceEntity>();
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
-    public DbSet<BoardTask> BoardTasks => Set<BoardTask>(); public DbSet<TokenUsageEntity> TokenUsages => Set<TokenUsageEntity>();
+    public DbSet<Meeting> Meetings => Set<Meeting>(); public DbSet<BoardTask> BoardTasks => Set<BoardTask>(); public DbSet<TokenUsageEntity> TokenUsages => Set<TokenUsageEntity>();
     public DbSet<RoleEntity> Roles => Set<RoleEntity>();
 
     public WorkIaDbContext(DbContextOptions<WorkIaDbContext> options) : base(options) { }
