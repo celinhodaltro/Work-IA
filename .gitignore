@@ -32,6 +32,11 @@ __pycache__/
 *.swo
 *~
 
+## Database
+*.db
+*.db-shm
+*.db-wal
+
 ## Build
 packages/
 *.nupkg
