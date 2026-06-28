@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Application.Services;
-using Work_IA.Domain.Abstractions;
+using Work_IA.Domain.Abstractions; using Work_IA.Domain.Ports;
 using Work_IA.Domain.Workspace;
 using Work_IA.Domain.Workspace.Ports;
 using Work_IA.Domain.Workflows;
@@ -47,7 +47,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.AddScoped<IWorkflowRepository, WorkflowRepository>();
-        services.AddScoped<ITokenUsageRepository, TokenUsageRepository>();
+        services.AddScoped<ITokenUsageRepository, TokenUsageRepository>(); services.AddScoped<IBoardRepository, BoardRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
 
         services.AddSingleton<IEventTypeResolver>(sp =>

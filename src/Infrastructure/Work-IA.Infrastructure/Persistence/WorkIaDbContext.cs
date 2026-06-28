@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Application.Services;
-using Work_IA.Domain.Abstractions;
+using Work_IA.Domain.Abstractions; using Work_IA.Domain.Agents;
 
 namespace Work_IA.Infrastructure.Persistence;
 
@@ -14,13 +14,13 @@ public sealed class WorkIaDbContext : DbContext, IUnitOfWork
     public DbSet<MemoryEntryEntity> MemoryEntries => Set<MemoryEntryEntity>();
     public DbSet<WorkflowInstanceEntity> WorkflowInstances => Set<WorkflowInstanceEntity>();
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
-    public DbSet<TokenUsageEntity> TokenUsages => Set<TokenUsageEntity>();
+    public DbSet<BoardTask> BoardTasks => Set<BoardTask>(); public DbSet<TokenUsageEntity> TokenUsages => Set<TokenUsageEntity>();
     public DbSet<RoleEntity> Roles => Set<RoleEntity>();
 
     public WorkIaDbContext(DbContextOptions<WorkIaDbContext> options) : base(options) { }
 
     /// <summary>
-    /// Registra um evento de domínio para ser persistido como StoredEvent e posteriormente despachado.
+    /// Registra um evento de domÃ­nio para ser persistido como StoredEvent e posteriormente despachado.
     /// </summary>
     internal void EnqueueDomainEvent(IDomainEvent domainEvent)
     {
@@ -28,7 +28,7 @@ public sealed class WorkIaDbContext : DbContext, IUnitOfWork
     }
 
     /// <summary>
-    /// Registra múltiplos eventos de domínio de uma vez.
+    /// Registra mÃºltiplos eventos de domÃ­nio de uma vez.
     /// </summary>
     internal void EnqueueDomainEvents(IEnumerable<IDomainEvent> domainEvents)
     {
@@ -39,7 +39,7 @@ public sealed class WorkIaDbContext : DbContext, IUnitOfWork
     /// IUnitOfWork: Retorna os eventos pendentes e limpa a lista interna.
     /// Chamado pelo UnitOfWorkBehavior ANTES de SaveChangesAsync e DispatchAsync.
     /// O DomainEventDispatcher.DispatchAsync adiciona StoredEvent ao DbSet via EventStore,
-    /// e o SaveChangesAsync posterior persiste tudo (entidades + StoredEvents) em uma transação.
+    /// e o SaveChangesAsync posterior persiste tudo (entidades + StoredEvents) em uma transaÃ§Ã£o.
     /// </summary>
     Task<IReadOnlyList<IDomainEvent>> IUnitOfWork.GetAndClearDomainEventsAsync(CancellationToken cancellationToken)
     {
