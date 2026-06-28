@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Work_IA.Application;
@@ -7,7 +7,7 @@ using Work_IA.Infrastructure.Persistence;
 using Work_IA.WebApi.Authorization;
 using Work_IA.WebApi.Hubs;
 using Work_IA.WebApi.Middleware;
-using Work_IA.WebApi.Serialization;
+using Work_IA.WebApi.Serialization; using Work_IA.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,10 +90,10 @@ app.UseAuthorization();
 
 // MAPEAR ROTAS PRIMEIRO
 app.MapControllers();
-app.MapHub<AgentCommunicationHub>("/hub/agents");
+app.MapHub<AgentCommunicationHub>("/hub/agents"); app.MapHub<AgentStateHub>("/hub/agent-states");
 
-// DEPOIS servir arquivos estáticos (fallback)
+// DEPOIS servir arquivos estÃ¡ticos (fallback)
 app.UseBlazorFrameworkFiles();
 app.MapFallbackToFile("index.html");
 
-app.Run();
+builder.Services.AddHostedService<AgentBehaviorHostedService>(); app.Run();

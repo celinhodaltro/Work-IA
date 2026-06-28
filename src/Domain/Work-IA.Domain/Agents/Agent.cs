@@ -25,6 +25,13 @@ public sealed class Agent : AggregateRoot<AgentId>
     public IReadOnlyList<ObservationRule> ObservationRules => _observationRules.AsReadOnly();
     public IReadOnlyList<AgentMessage> Inbox => _inbox.AsReadOnly();
 
+    public AgentAction CurrentAction { get; set; } = AgentAction.Idle;
+    public float ActionTimer { get; set; }
+    public AgentEmotion Emotion { get; set; } = AgentEmotion.Neutral;
+    public string? ConversationTopic { get; set; }
+    public AgentId? ConversationPartner { get; set; }
+    public AgentPosition Position { get; set; } = new(0, 0, 0);
+
     private Agent() : base(AgentId.New()) { }
 
     public Agent(AgentId id, AgentName name, AgentTitle title, AgentCareerLevel careerLevel) : base(id)

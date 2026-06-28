@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
@@ -8,7 +8,7 @@ namespace Work_IA.Application.Agents;
 
 public class AgentBase : IAgent
 {
-    protected readonly Agent Agent;
+    public readonly Agent Agent;
     protected readonly IEventBus EventBus;
     protected readonly IMediator Mediator;
     protected readonly ILogger Logger;

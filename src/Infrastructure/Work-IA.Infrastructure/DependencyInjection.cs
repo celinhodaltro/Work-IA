@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +14,7 @@ using Work_IA.Infrastructure.Adapters;
 using Work_IA.Infrastructure.BackgroundServices;
 using Work_IA.Infrastructure.Communication;
 using Work_IA.Infrastructure.EventBus;
+using Work_IA.Application.Services;
 using Work_IA.Infrastructure.Persistence;
 using Work_IA.Infrastructure.Persistence.EventStore;
 using Work_IA.Infrastructure.Persistence.Repositories;
@@ -41,7 +42,7 @@ public static class DependencyInjection
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(WorkIaDbContext).Assembly.FullName)));
 
-        // IUnitOfWork aponta para o DbContext (EF Core DbContext é o Unit of Work)
+        // IUnitOfWork aponta para o DbContext (EF Core DbContext Ã© o Unit of Work)
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<WorkIaDbContext>());
 
         services.AddScoped<IAgentRepository, AgentRepository>();
@@ -98,6 +99,6 @@ public static class DependencyInjection
         services.AddHostedService<WorkflowStartupService>();
         services.AddHostedService<RoleSeedService>();
 
-        return services;
+         return services;
     }
 }
