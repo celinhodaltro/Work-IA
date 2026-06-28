@@ -3,12 +3,14 @@ using Microsoft.Extensions.Hosting;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var redis = builder.AddRedis("cache")
-    .WithImage("redis", "7-alpine");
+    .WithImage("redis", "7-alpine")
+    .WithContainerName("workia-redis");
 
 var rabbitMq = builder.AddRabbitMQ("eventbus")
-    .WithImage("rabbitmq", "3-management-alpine");
+    .WithImage("rabbitmq", "3-management-alpine")
+    .WithContainerName("workia-rabbitmq");
 
-var webApi = builder.AddProject<Projects.Work_IA_WebApi>("webapi")
+var api = builder.AddProject<Projects.Work_IA_WebApi>("webapi")
     .WithReference(redis)
     .WithReference(rabbitMq)
     .WithEnvironment("ConnectionStrings__DefaultConnection", "Data Source=workia.db")
