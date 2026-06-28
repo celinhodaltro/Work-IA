@@ -6,14 +6,14 @@ namespace Work_IA.Domain.Agents;
 public sealed class Meeting : AggregateRoot<Guid>
 {
     public string Topic { get; private set; }
-    public List<AgentId> Participants { get; private set; }
+    public List<Guid> Participants { get; private set; }
     public DateTime ScheduledAt { get; private set; }
     public MeetingStatus Status { get; private set; }
     public List<string> Decisions { get; private set; }
 
     private Meeting() : base(Guid.NewGuid()) { }
 
-    public static Meeting Schedule(string topic, List<AgentId> participants, DateTime? scheduledAt = null)
+    public static Meeting Schedule(string topic, List<Guid> participants, DateTime? scheduledAt = null)
     {
         return new Meeting
         {

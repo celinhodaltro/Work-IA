@@ -6,7 +6,7 @@ public sealed class BoardTask : Entity<Guid>
 {
     public string Title { get; private set; }
     public string Description { get; private set; }
-    public AgentId? AssignedTo { get; private set; }
+    public Guid? AssignedTo { get; private set; }
     public BoardColumn Column { get; private set; }
     public TaskPriority Priority { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -27,7 +27,7 @@ public sealed class BoardTask : Entity<Guid>
         };
     }
 
-    public void AssignTo(AgentId agentId)
+    public void AssignTo(Guid agentId)
     {
         AssignedTo = agentId;
         Column = BoardColumn.InProgress;
