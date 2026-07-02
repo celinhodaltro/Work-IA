@@ -44,6 +44,10 @@ public sealed class UIManager
         _controller = new ImGuiController(gl, view, input);
     }
 
+    public void HandleInput(IInputContext input)
+    {
+    }
+
     public void Update(float delta)
     {
         _controller?.Update(delta);
@@ -64,31 +68,47 @@ public sealed class UIManager
 
     private void RenderLauncher()
     {
-        var center = new Vector2(400, 300);
-        ImGui.SetNextWindowPos(new Vector2(center.X - 200, center.Y - 200), ImGuiCond.Always);
-        ImGui.SetNextWindowSize(new Vector2(400, 350));
-        ImGui.Begin("AI Office OS", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove);
+        var w = (float)ImGui.GetIO().DisplaySize.X;
+        var h = (float)ImGui.GetIO().DisplaySize.Y;
+
+        ImGui.SetNextWindowPos(Vector2.Zero);
+        ImGui.SetNextWindowSize(new Vector2(w, h));
+        ImGui.Begin("Launcher", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
+
+        var draw = ImGui.GetWindowDrawList();
+        var bgColor = ImGui.GetColorU32(new Vector4(0.08f, 0.08f, 0.12f, 1));
+        draw.AddRectFilled(Vector2.Zero, new Vector2(w, h), bgColor);
+
+        var topBarColor = ImGui.GetColorU32(new Vector4(0.12f, 0.12f, 0.18f, 1));
+        draw.AddRectFilled(new Vector2(0, 0), new Vector2(w, 50), topBarColor);
+
+        ImGui.SetCursorPos(new Vector2(20, 15));
+        ImGui.TextColored(new Vector4(0.3f, 0.6f, 1f, 1), "AI Office OS");
 
         if (_isTesting)
         {
+            ImGui.SetCursorPos(new Vector2(w / 2 - 100, h / 2 - 20));
             ImGui.Text("Testing connection...");
+            ImGui.SetCursorPos(new Vector2(w / 2 - 100, h / 2 + 10));
             ImGui.Text(_statusMessage);
         }
         else if (_config.IsConfigured)
         {
-            ImGui.Text("AI Office OS");
-            ImGui.Separator();
+            ImGui.SetCursorPos(new Vector2(w / 2 - 100, h / 2 - 60));
+            ImGui.TextColored(new Vector4(0.3f, 0.8f, 0.3f, 1), "Configured");
+            ImGui.SetCursorPos(new Vector2(w / 2 - 100, h / 2 - 30));
             ImGui.Text($"Provider: {_config.Config.AiProvider}");
-            ImGui.Text($"Status: Configured");
-            ImGui.Separator();
-            if (ImGui.Button("Continue", new Vector2(180, 40)))
+
+            var btnY = h - 80;
+            ImGui.SetCursorPos(new Vector2(w / 2 - 120, btnY));
+            if (ImGui.Button("Continue", new Vector2(110, 40)))
             {
                 _isTesting = true;
                 _statusMessage = "Validating...";
                 Task.Run(ValidateAndStart);
             }
-            ImGui.SameLine();
-            if (ImGui.Button("Reconfigure", new Vector2(180, 40)))
+            ImGui.SetCursorPos(new Vector2(w / 2 + 10, btnY));
+            if (ImGui.Button("Reconfigure", new Vector2(110, 40)))
             {
                 _config.Reset();
                 _selectedProvider = "opencode";
@@ -97,20 +117,26 @@ public sealed class UIManager
         }
         else
         {
-            ImGui.Text("Welcome! Select your AI provider:");
-            ImGui.Separator();
+            ImGui.SetCursorPos(new Vector2(w / 2 - 100, h / 2 - 80));
+            ImGui.Text("Select AI Provider:");
+
+            ImGui.SetCursorPos(new Vector2(w / 2 - 100, h / 2 - 40));
             bool isOpen = _selectedProvider == "opencode";
-            bool isClaude = _selectedProvider == "claude";
             if (ImGui.RadioButton("OpenCode", isOpen)) _selectedProvider = "opencode";
-            ImGui.SameLine();
+
+            ImGui.SetCursorPos(new Vector2(w / 2 - 100, h / 2 - 10));
+            bool isClaude = _selectedProvider == "claude";
             if (ImGui.RadioButton("Claude Code", isClaude)) _selectedProvider = "claude";
-            ImGui.Separator();
+
             if (_selectedProvider == "claude")
             {
+                ImGui.SetCursorPos(new Vector2(w / 2 - 100, h / 2 + 30));
                 ImGui.InputText("API Key", ref _apiKey, 200);
             }
-            ImGui.Separator();
-            if (ImGui.Button("Start", new Vector2(380, 40)))
+
+            var btnY2 = h - 80;
+            ImGui.SetCursorPos(new Vector2(w / 2 - 80, btnY2));
+            if (ImGui.Button("Start", new Vector2(160, 44)))
             {
                 _config.SetProvider(_selectedProvider);
                 _config.SetApiKey(_apiKey);

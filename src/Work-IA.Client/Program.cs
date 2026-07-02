@@ -59,7 +59,11 @@ public static class Program
 
         window.Update += (dt) =>
         {
-            if (input is not null && !ui.IsLauncherMode) renderer.HandleInput(input);
+            if (input is not null)
+            {
+                renderer.HandleInput(input);
+                ui.HandleInput(input);
+            }
             if (!ui.IsLauncherMode) renderer.Update((float)dt);
             ui.Update((float)dt);
         };
