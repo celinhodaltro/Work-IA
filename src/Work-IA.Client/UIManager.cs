@@ -31,6 +31,8 @@ public sealed class UIManager
     {
         _input = input;
         _controller = new ImGuiController(gl, view, input);
+        var io = ImGui.GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
     }
 
     public void Update(float delta)
