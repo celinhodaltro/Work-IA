@@ -8,6 +8,7 @@ using Silk.NET.Windowing;
 using Work_IA.Application;
 using Work_IA.Client.Rendering;
 using Work_IA.Infrastructure;
+using Work_IA.Infrastructure.Persistence;
 
 namespace Work_IA.Client;
 
@@ -27,6 +28,12 @@ public static class Program
             .Build();
 
         await host.StartAsync();
+
+        using (var scope = host.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<WorkIaDbContext>();
+            db.Database.EnsureCreated();
+        }
 
         var options = WindowOptions.Default;
         options.Size = new Vector2D<int>(1280, 720);
