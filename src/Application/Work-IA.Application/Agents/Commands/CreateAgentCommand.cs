@@ -4,4 +4,4 @@ using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Agents.Commands;
 
-public sealed record CreateAgentCommand(string Name, string Title, Guid? RoleId = null) : IRequest<AgentId>, IRequiresUnitOfWork;
+public sealed record CreateAgentCommand(string Name, string Title, Guid? RoleId = null, int? CareerLevel = null) : IRequest<AgentId>, IRequiresUnitOfWork;

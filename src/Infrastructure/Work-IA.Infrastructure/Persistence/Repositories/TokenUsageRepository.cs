@@ -60,7 +60,7 @@ public sealed class TokenUsageRepository : ITokenUsageRepository
                 AgentId = agentId,
                 TotalTokensIn = g.Sum(t => t.TokensIn),
                 TotalTokensOut = g.Sum(t => t.TokensOut),
-                TotalCost = g.Sum(t => t.Cost),
+                TotalCost = (decimal)g.Sum(t => (double)t.Cost),
                 TaskCount = g.Count(),
                 MostUsedModel = g.GroupBy(t => t.ModelName).OrderByDescending(x => x.Count()).Select(x => x.Key).FirstOrDefault() ?? ""
             }).FirstOrDefaultAsync(ct) ?? new AgentCostSummary { AgentId = agentId };
@@ -86,7 +86,7 @@ public sealed class TokenUsageRepository : ITokenUsageRepository
                 AgentId = new AgentId(g.Key),
                 TotalTokensIn = g.Sum(t => t.TokensIn),
                 TotalTokensOut = g.Sum(t => t.TokensOut),
-                TotalCost = g.Sum(t => t.Cost),
+                TotalCost = (decimal)g.Sum(t => (double)t.Cost),
                 TaskCount = g.Count(),
                 MostUsedModel = g.GroupBy(t => t.ModelName).OrderByDescending(x => x.Count()).Select(x => x.Key).FirstOrDefault() ?? ""
             }).ToListAsync(ct);

@@ -46,9 +46,9 @@ public sealed class Agent : AggregateRoot<AgentId>
         JoinedAt = DateTime.UtcNow;
     }
 
-    public static Agent Create(AgentName name, AgentTitle title, RoleId? roleId = null)
+    public static Agent Create(AgentName name, AgentTitle title, RoleId? roleId = null, AgentCareerLevel? level = null)
     {
-        var agent = new Agent(AgentId.New(), name, title, AgentCareerLevel.Intern)
+        var agent = new Agent(AgentId.New(), name, title, level ?? AgentCareerLevel.Intern)
         {
             Status = AgentStatus.Created,
             ExperiencePoints = 0,

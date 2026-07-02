@@ -64,6 +64,7 @@ public static class DependencyInjection
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddSingleton<IEventBus, InMemoryEventBus>();
+        services.AddSingleton<IOpenCodeService, OpenCodeService>();
         services.AddSingleton<ICommunicationBus, CommunicationBus>();
         services.AddSingleton<IFileSystemService>(new FileSystemService(workspacePath));
         services.AddSingleton<IGitIntegrationService>(new GitIntegrationService(workspacePath));

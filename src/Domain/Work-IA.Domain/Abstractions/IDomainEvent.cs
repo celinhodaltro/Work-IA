@@ -1,6 +1,8 @@
+using MediatR;
+
 namespace Work_IA.Domain.Abstractions;
 
-public interface IDomainEvent
+public interface IDomainEvent : INotification
 {
     Guid EventId { get; }
     DateTime OccurredOn { get; }

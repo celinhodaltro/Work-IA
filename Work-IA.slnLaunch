@@ -9,10 +9,6 @@
       {
         "Path": "src\\Presentation\\Work-IA.Office\\Work-IA.Office.csproj",
         "Action": "Start"
-      },
-      {
-        "Path": "src\\Presentation\\Work-IA.BlazorDashboard\\Work-IA.BlazorDashboard.csproj",
-        "Action": "Start"
       }
     ]
   }

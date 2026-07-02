@@ -36,7 +36,8 @@ public sealed class CreateAgentCommandHandler : IRequestHandler<CreateAgentComma
     public async Task<AgentId> Handle(CreateAgentCommand request, CancellationToken cancellationToken)
     {
         RoleId? roleId = request.RoleId.HasValue ? RoleId.From(request.RoleId.Value) : null;
-        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title), roleId);
+        AgentCareerLevel? level = request.CareerLevel.HasValue ? (AgentCareerLevel)request.CareerLevel.Value : null;
+        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title), roleId, level);
 
         await _repository.AddAsync(agent, cancellationToken);
 
