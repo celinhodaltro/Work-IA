@@ -1,6 +1,7 @@
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
+using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using Work_IA.Application.Agents;
 using Work_IA.Domain.Agents;
@@ -11,7 +12,7 @@ public sealed class UIManager : IDisposable
 {
     private readonly AgentRegistry _registry;
     private readonly AgentStateEventHandler _eventHandler;
-    private ImGuiBackend? _backend;
+    private ImGuiController? _controller;
     private bool _showAgents = true;
     private bool _showHire = false;
     private string _newName = "";
@@ -26,32 +27,32 @@ public sealed class UIManager : IDisposable
 
     public void Initialize(GL gl, IView view, IInputContext input)
     {
-        _backend = new ImGuiBackend(gl, input);
+        _controller = new ImGuiController(gl, view, input);
     }
 
-    public void Update(float delta, int width, int height)
+    public void Update(float delta)
     {
-        _backend?.NewFrame(width, height, delta);
+        _controller?.Update(delta);
     }
 
     public void Render()
     {
-        RenderOfficeUI();
-        _backend?.Render();
+        ImGuiNET.ImGui.NewFrame();
+        RenderUI();
+        ImGuiNET.ImGui.EndFrame();
+        _controller?.Render();
     }
 
-    private void RenderOfficeUI()
+    private void RenderUI()
     {
         ImGui.SetNextWindowPos(new System.Numerics.Vector2(ImGui.GetIO().DisplaySize.X - 340, 60), ImGuiCond.Always);
         ImGui.SetNextWindowSize(new System.Numerics.Vector2(320, 0));
         ImGui.Begin("AI Office OS", ImGuiWindowFlags.AlwaysAutoResize);
         ImGui.Text($"Agents Online: {_registry.GetAll().Count(a => a.Status == AgentStatus.Running)}");
         ImGui.Separator();
-
         if (ImGui.Button("Hire Agent")) _showHire = !_showHire;
         ImGui.SameLine();
         if (ImGui.Button("Agent List")) _showAgents = !_showAgents;
-
         if (_showHire)
         {
             ImGui.Begin("Hire Agent", ImGuiWindowFlags.AlwaysAutoResize);
@@ -64,7 +65,6 @@ public sealed class UIManager : IDisposable
             }
             ImGui.End();
         }
-
         if (_showAgents)
         {
             ImGui.Begin("Agents", ImGuiWindowFlags.AlwaysAutoResize);
@@ -73,20 +73,15 @@ public sealed class UIManager : IDisposable
                 ImGui.PushID(a.Id.ToString());
                 ImGui.Text($"{a.GetEmoji()} {a.Name} - {a.Title}");
                 ImGui.Text($"  {a.Emotion} | {a.CurrentAction}");
-                if (a.ConversationTopic is not null)
-                    ImGui.Text($"  💬 {a.ConversationTopic}");
+                if (a.ConversationTopic is not null) ImGui.Text($"  💬 {a.ConversationTopic}");
                 ImGui.Separator();
                 ImGui.PopID();
             }
             ImGui.End();
         }
-
-        if (!string.IsNullOrEmpty(_log))
-        {
-            ImGui.Begin("Log"); ImGui.Text(_log); ImGui.End();
-        }
+        if (!string.IsNullOrEmpty(_log)) { ImGui.Begin("Log"); ImGui.Text(_log); ImGui.End(); }
         ImGui.End();
     }
 
-    public void Dispose() => _backend?.Dispose();
+    public void Dispose() => _controller?.Dispose();
 }
