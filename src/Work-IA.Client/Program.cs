@@ -54,7 +54,7 @@ public static class Program
             var gl = GL.GetApi(window);
             renderer.Initialize(gl, window.Size);
             input = window.CreateInput();
-            ui.Initialize(gl, window);
+            ui.Initialize(gl, window, input);
         };
 
         window.Update += (dt) =>

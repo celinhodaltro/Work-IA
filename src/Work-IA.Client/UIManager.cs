@@ -39,9 +39,8 @@ public sealed class UIManager
         if (_config.IsConfigured) _launcherMode = false;
     }
 
-    public void Initialize(GL gl, IView view)
+    public void Initialize(GL gl, IView view, IInputContext input)
     {
-        var input = view.CreateInput();
         _controller = new ImGuiController(gl, view, input);
     }
 
