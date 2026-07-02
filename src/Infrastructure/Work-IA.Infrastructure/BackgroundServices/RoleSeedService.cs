@@ -54,8 +54,8 @@ public sealed class RoleSeedService : IHostedService
         }
 
         var headAgent = Agent.Create(
-            new AgentName("Head of Engineering"),
-            new AgentTitle("Head of Engineering"),
+            new AgentName("Head"),
+            new AgentTitle("Head"),
             null,
             new AgentPermissions(false, false, true, null),
             true);
