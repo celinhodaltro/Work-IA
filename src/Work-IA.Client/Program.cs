@@ -39,10 +39,12 @@ public static class Program
         await host.StartAsync();
 
         var options = WindowOptions.Default;
-        options.Size = new Vector2D<int>(800, 600);
+        options.Size = new Vector2D<int>(1280, 720);
         options.Title = "AI Office OS";
         options.PreferredDepthBufferBits = 24;
         options.API = GraphicsAPI.Default;
+        options.WindowState = WindowState.Maximized;
+        options.WindowBorder = WindowBorder.Resizable;
 
         var window = Window.Create(options);
         var renderer = host.Services.GetRequiredService<OfficeRenderer>();
@@ -59,11 +61,7 @@ public static class Program
 
         window.Update += (dt) =>
         {
-            if (input is not null)
-            {
-                renderer.HandleInput(input);
-                ui.HandleInput(input);
-            }
+            if (input is not null) renderer.HandleInput(input);
             if (!ui.IsLauncherMode) renderer.Update((float)dt);
             ui.Update((float)dt);
         };
@@ -72,7 +70,7 @@ public static class Program
         {
             var gl = GL.GetApi(window);
             gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            if (!ui.IsLauncherMode) renderer.Render();
+            renderer.Render();
             ui.Render();
         };
 
