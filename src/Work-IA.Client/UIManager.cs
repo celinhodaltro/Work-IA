@@ -35,26 +35,25 @@ public sealed class UIManager
 
     public void Update(float delta)
     {
-        if (_input is not null)
-        {
-            var io = ImGui.GetIO();
-            if (_input.Mice.Count > 0)
-            {
-                var mouse = _input.Mice[0];
-                io.MousePos = new Vector2(mouse.Position.X, mouse.Position.Y);
-                io.MouseDown[0] = mouse.IsButtonPressed(MouseButton.Left);
-                io.MouseDown[1] = mouse.IsButtonPressed(MouseButton.Right);
-            }
-        }
         _controller?.Update(delta);
+        if (_input is not null && _input.Mice.Count > 0)
+        {
+            var mouse = _input.Mice[0];
+            var io = ImGui.GetIO();
+            io.MousePos = new Vector2(mouse.Position.X, mouse.Position.Y);
+            io.MouseDown[0] = mouse.IsButtonPressed(MouseButton.Left);
+            io.MouseDown[1] = mouse.IsButtonPressed(MouseButton.Right);
+            io.AddMousePosEvent(mouse.Position.X, mouse.Position.Y);
+            io.AddMouseButtonEvent(0, mouse.IsButtonPressed(MouseButton.Left));
+        }
     }
 
     public void Render()
     {
         ImGuiNET.ImGui.NewFrame();
 
-        ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X - 320, 0), ImGuiCond.Always);
-        ImGui.SetNextWindowSize(new Vector2(300, 0));
+        ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X - 340, 60), ImGuiCond.Always);
+        ImGui.SetNextWindowSize(new Vector2(320, 0));
         RenderOfficeUI();
 
         ImGuiNET.ImGui.EndFrame();
