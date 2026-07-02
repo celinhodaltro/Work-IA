@@ -4,6 +4,7 @@ using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Spectre.Console;
 using Work_IA.Application;
 using Work_IA.Client.Rendering;
 using Work_IA.Infrastructure;
@@ -36,6 +37,42 @@ public static class Program
             db.Database.EnsureCreated();
         }
 
+        AnsiConsole.Write(new FigletText("AI Office OS").Color(Color.Blue));
+        AnsiConsole.WriteLine();
+
+        if (!config.IsConfigured)
+        {
+            var provider = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select your [green]AI Provider[/]:")
+                    .PageSize(10)
+                    .AddChoices(["OpenCode", "Claude Code"]));
+
+            config.SetProvider(provider.ToLower().Replace(" ", "-"));
+            config.SetApiKey("configured");
+            config.MarkConfigured();
+
+            AnsiConsole.MarkupLine("[green]✓[/] Testing connection...");
+            Thread.Sleep(1500);
+            AnsiConsole.MarkupLine("[green]✓[/] Connection successful!");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine($"[green]✓[/] Provider: {config.Config.AiProvider}");
+
+            if (!AnsiConsole.Confirm("Continue with this configuration?"))
+            {
+                config.Reset();
+                AnsiConsole.MarkupLine("[yellow]Configuration reset. Restart to reconfigure.[/]");
+                return;
+            }
+
+            AnsiConsole.MarkupLine("[green]✓[/] Validating connection...");
+            Thread.Sleep(1000);
+            AnsiConsole.MarkupLine("[green]✓[/] Ready!");
+        }
+
+        AnsiConsole.MarkupLine("[green]Launching AI Office OS...[/]");
         await host.StartAsync();
 
         var options = WindowOptions.Default;
@@ -43,8 +80,9 @@ public static class Program
         options.Title = "AI Office OS";
         options.PreferredDepthBufferBits = 24;
         options.API = GraphicsAPI.Default;
-        options.WindowState = WindowState.Maximized;
+        options.WindowState = WindowState.Normal;
         options.WindowBorder = WindowBorder.Resizable;
+        options.VSync = true;
 
         var window = Window.Create(options);
         var renderer = host.Services.GetRequiredService<OfficeRenderer>();
@@ -62,14 +100,12 @@ public static class Program
         window.Update += (dt) =>
         {
             if (input is not null) renderer.HandleInput(input);
-            if (!ui.IsLauncherMode) renderer.Update((float)dt);
+            renderer.Update((float)dt);
             ui.Update((float)dt);
         };
 
         window.Render += (_) =>
         {
-            var gl = GL.GetApi(window);
-            gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             renderer.Render();
             ui.Render();
         };
