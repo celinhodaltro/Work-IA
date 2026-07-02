@@ -14,6 +14,11 @@ public sealed class AgentEntity
     public DateTime JoinedAt { get; set; }
     public DateTime? LastPromotionAt { get; set; }
     public DateTime? LastHeartbeat { get; set; }
+    public bool IsHead { get; set; }
+    public bool CanRead { get; set; } = true;
+    public bool CanWrite { get; set; } = true;
+    public bool CanDelegate { get; set; }
+    public Guid? ReportsTo { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

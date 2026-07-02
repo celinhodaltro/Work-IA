@@ -116,6 +116,8 @@ public sealed class AgentRepository : IAgentRepository
         agentType.GetProperty(nameof(Agent.LastHeartbeat))!.SetValue(agent, entity.LastHeartbeat);
         agentType.GetProperty(nameof(Agent.JoinedAt))!.SetValue(agent, entity.JoinedAt);
         agentType.GetProperty(nameof(Agent.LastPromotionAt))!.SetValue(agent, entity.LastPromotionAt);
+        agentType.GetProperty(nameof(Agent.IsHead))!.SetValue(agent, entity.IsHead);
+        agentType.GetProperty(nameof(Agent.Permissions))!.SetValue(agent, new AgentPermissions(entity.CanRead, entity.CanWrite, entity.CanDelegate, entity.ReportsTo.HasValue ? AgentId.From(entity.ReportsTo.Value) : null));
 
         if (entity.MentorId.HasValue)
         {
@@ -164,6 +166,11 @@ public sealed class AgentRepository : IAgentRepository
             JoinedAt = agent.JoinedAt,
             LastPromotionAt = agent.LastPromotionAt,
             LastHeartbeat = agent.LastHeartbeat,
+            IsHead = agent.IsHead,
+            CanRead = agent.Permissions.CanRead,
+            CanWrite = agent.Permissions.CanWrite,
+            CanDelegate = agent.Permissions.CanDelegate,
+            ReportsTo = agent.Permissions.ReportsTo?.Value,
             CreatedAt = agent.CreatedAt,
             UpdatedAt = agent.UpdatedAt
         };
