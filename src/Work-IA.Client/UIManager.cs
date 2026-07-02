@@ -1,3 +1,4 @@
+using System.Numerics;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
@@ -13,6 +14,7 @@ public sealed class UIManager
     private readonly AgentRegistry _registry;
     private readonly AgentStateEventHandler _eventHandler;
     private ImGuiController? _controller;
+    private IInputContext? _input;
     private bool _showAgents = true;
     private bool _showHire = false;
     private string _newName = "";
@@ -27,18 +29,34 @@ public sealed class UIManager
 
     public void Initialize(GL gl, IView view, IInputContext input)
     {
+        _input = input;
         _controller = new ImGuiController(gl, view, input);
     }
 
     public void Update(float delta)
     {
+        if (_input is not null)
+        {
+            var io = ImGui.GetIO();
+            if (_input.Mice.Count > 0)
+            {
+                var mouse = _input.Mice[0];
+                io.MousePos = new Vector2(mouse.Position.X, mouse.Position.Y);
+                io.MouseDown[0] = mouse.IsButtonPressed(MouseButton.Left);
+                io.MouseDown[1] = mouse.IsButtonPressed(MouseButton.Right);
+            }
+        }
         _controller?.Update(delta);
     }
 
     public void Render()
     {
         ImGuiNET.ImGui.NewFrame();
+
+        ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X - 320, 0), ImGuiCond.Always);
+        ImGui.SetNextWindowSize(new Vector2(300, 0));
         RenderOfficeUI();
+
         ImGuiNET.ImGui.EndFrame();
         _controller?.Render();
     }
