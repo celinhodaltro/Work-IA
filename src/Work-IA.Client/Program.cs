@@ -101,7 +101,7 @@ public static class Program
         {
             if (input is not null) renderer.HandleInput(input);
             renderer.Update((float)dt);
-            ui.Update((float)dt);
+            ui.Update((float)dt, window.Size.X, window.Size.Y);
         };
 
         window.Render += (_) =>

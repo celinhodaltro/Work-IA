@@ -1,20 +1,17 @@
-using System.Numerics;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
-using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using Work_IA.Application.Agents;
 using Work_IA.Domain.Agents;
 
 namespace Work_IA.Client;
 
-public sealed class UIManager
+public sealed class UIManager : IDisposable
 {
     private readonly AgentRegistry _registry;
     private readonly AgentStateEventHandler _eventHandler;
-    private ImGuiController? _controller;
-    private IInputContext? _input;
+    private ImGuiBackend? _backend;
     private bool _showAgents = true;
     private bool _showHire = false;
     private string _newName = "";
@@ -29,41 +26,24 @@ public sealed class UIManager
 
     public void Initialize(GL gl, IView view, IInputContext input)
     {
-        _input = input;
-        _controller = new ImGuiController(gl, view, input);
-        var io = ImGui.GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
+        _backend = new ImGuiBackend(gl, input);
     }
 
-    public void Update(float delta)
+    public void Update(float delta, int width, int height)
     {
-        _controller?.Update(delta);
-        if (_input is not null && _input.Mice.Count > 0)
-        {
-            var mouse = _input.Mice[0];
-            var io = ImGui.GetIO();
-            io.MousePos = new Vector2(mouse.Position.X, mouse.Position.Y);
-            io.MouseDown[0] = mouse.IsButtonPressed(MouseButton.Left);
-            io.MouseDown[1] = mouse.IsButtonPressed(MouseButton.Right);
-            io.AddMousePosEvent(mouse.Position.X, mouse.Position.Y);
-            io.AddMouseButtonEvent(0, mouse.IsButtonPressed(MouseButton.Left));
-        }
+        _backend?.NewFrame(width, height, delta);
     }
 
     public void Render()
     {
-        ImGuiNET.ImGui.NewFrame();
-
-        ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X - 340, 60), ImGuiCond.Always);
-        ImGui.SetNextWindowSize(new Vector2(320, 0));
         RenderOfficeUI();
-
-        ImGuiNET.ImGui.EndFrame();
-        _controller?.Render();
+        _backend?.Render();
     }
 
     private void RenderOfficeUI()
     {
+        ImGui.SetNextWindowPos(new System.Numerics.Vector2(ImGui.GetIO().DisplaySize.X - 340, 60), ImGuiCond.Always);
+        ImGui.SetNextWindowSize(new System.Numerics.Vector2(320, 0));
         ImGui.Begin("AI Office OS", ImGuiWindowFlags.AlwaysAutoResize);
         ImGui.Text($"Agents Online: {_registry.GetAll().Count(a => a.Status == AgentStatus.Running)}");
         ImGui.Separator();
@@ -108,5 +88,5 @@ public sealed class UIManager
         ImGui.End();
     }
 
-    public void Dispose() => _controller?.Dispose();
+    public void Dispose() => _backend?.Dispose();
 }
