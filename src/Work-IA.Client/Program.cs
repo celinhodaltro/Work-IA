@@ -27,13 +27,13 @@ public static class Program
             })
             .Build();
 
-        await host.StartAsync();
-
         using (var scope = host.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<WorkIaDbContext>();
             db.Database.EnsureCreated();
         }
+
+        await host.StartAsync();
 
         var options = WindowOptions.Default;
         options.Size = new Vector2D<int>(1280, 720);
