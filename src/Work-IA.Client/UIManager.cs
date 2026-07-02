@@ -68,72 +68,61 @@ public sealed class UIManager
         var w = io.DisplaySize.X;
         var h = io.DisplaySize.Y;
 
-        var bgColor = ImGui.GetColorU32(new Vector4(0.06f, 0.06f, 0.10f, 1f));
-        var topBarColor = ImGui.GetColorU32(new Vector4(0.10f, 0.10f, 0.14f, 1f));
-        var accentColor = ImGui.GetColorU32(new Vector4(0.25f, 0.45f, 0.85f, 1f));
-        var textColor = ImGui.GetColorU32(new Vector4(0.95f, 0.95f, 1f, 1f));
+        ImGui.SetNextWindowPos(Vector2.Zero);
+        ImGui.SetNextWindowSize(new Vector2(w, h));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 0);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(0.06f, 0.06f, 0.10f, 1f));
+        ImGui.Begin("Launcher", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoBringToFrontOnFocus);
 
-        var draw = ImGui.GetForegroundDrawList();
-        draw.AddRectFilled(Vector2.Zero, new Vector2(w, h), bgColor);
-        draw.AddRectFilled(new Vector2(0, 0), new Vector2(w, 56), topBarColor);
-        draw.AddRectFilled(new Vector2(0, 56), new Vector2(w, 58), accentColor);
+        var draw = ImGui.GetWindowDrawList();
+        var winPos = ImGui.GetWindowPos();
+        ImGui.SetCursorPos(Vector2.Zero);
+        ImGui.Dummy(new Vector2(w, h));
 
-        draw.AddText(new Vector2(24, 16), ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 1f, 1)), "AI Office OS");
+        draw.AddRectFilled(new Vector2(winPos.X, winPos.Y + 56), new Vector2(winPos.X + w, winPos.Y + 58), ImGui.GetColorU32(new Vector4(0.25f, 0.45f, 0.85f, 1f)));
+        draw.AddText(new Vector2(winPos.X + 24, winPos.Y + 16), ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 1f, 1)), "AI Office OS");
 
-        var panelW = 380f;
-        var panelX = (w - panelW) / 2;
+        var panelX = w / 2 - 190;
         var panelY = 120f;
 
         if (_isTesting)
         {
-            draw.AddText(new Vector2(panelX, panelY), textColor, "Testing connection...");
-            draw.AddText(new Vector2(panelX, panelY + 30), textColor, _statusMessage);
+            ImGui.SetCursorPos(new Vector2(panelX, panelY));
+            ImGui.Text("Testing connection...");
+            ImGui.SetCursorPos(new Vector2(panelX, panelY + 30));
+            ImGui.Text(_statusMessage);
         }
         else if (_config.IsConfigured)
         {
-            draw.AddText(new Vector2(panelX, panelY), ImGui.GetColorU32(new Vector4(0.3f, 0.8f, 0.3f, 1)), "✓ Configured");
-            draw.AddText(new Vector2(panelX, panelY + 30), textColor, $"Provider: {_config.Config.AiProvider}");
+            ImGui.SetCursorPos(new Vector2(panelX, panelY));
+            ImGui.TextColored(new Vector4(0.3f, 0.8f, 0.3f, 1), "Configured");
+            ImGui.SetCursorPos(new Vector2(panelX, panelY + 30));
+            ImGui.Text($"Provider: {_config.Config.AiProvider}");
 
-            ImGui.SetCursorPos(new Vector2(panelX, h - 100));
-            if (ImGui.Button("Continue", new Vector2(170, 44)))
-            {
-                _isTesting = true;
-                _statusMessage = "Validating...";
-                Task.Run(ValidateAndStart);
-            }
-            ImGui.SameLine();
-            if (ImGui.Button("Reconfigure", new Vector2(170, 44)))
-            {
-                _config.Reset();
-                _selectedProvider = "opencode";
-                _apiKey = "";
-            }
+            ImGui.SetCursorPos(new Vector2(panelX, h - 120));
+            if (ImGui.Button("Continue", new Vector2(170, 44))) { _isTesting = true; _statusMessage = "Validating..."; Task.Run(ValidateAndStart); }
+            ImGui.SetCursorPos(new Vector2(panelX + 200, h - 120));
+            if (ImGui.Button("Reconfigure", new Vector2(170, 44))) { _config.Reset(); _selectedProvider = "opencode"; _apiKey = ""; }
         }
         else
         {
-            draw.AddText(new Vector2(panelX, panelY), ImGui.GetColorU32(new Vector4(0.7f, 0.7f, 0.8f, 1)), "Select AI Provider");
+            ImGui.SetCursorPos(new Vector2(panelX, panelY));
+            ImGui.Text("Select AI Provider:");
 
             ImGui.SetCursorPos(new Vector2(panelX, panelY + 50));
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(12, 8));
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 12));
+            if (ImGui.Selectable("  OpenCode", _selectedProvider == "opencode", ImGuiSelectableFlags.DontClosePopups, new Vector2(380, 36))) _selectedProvider = "opencode";
 
-            ImGui.SetCursorPos(new Vector2(panelX, panelY + 80));
-            ImGui.Text(_selectedProvider == "opencode" ? "● OpenCode" : "○ OpenCode");
-            if (ImGui.IsItemClicked()) _selectedProvider = "opencode";
-
-            ImGui.SetCursorPos(new Vector2(panelX, panelY + 110));
-            ImGui.Text(_selectedProvider == "claude" ? "● Claude Code" : "○ Claude Code");
-            if (ImGui.IsItemClicked()) _selectedProvider = "claude";
-
-            ImGui.PopStyleVar(2);
+            ImGui.SetCursorPos(new Vector2(panelX, panelY + 90));
+            if (ImGui.Selectable("  Claude Code", _selectedProvider == "claude", ImGuiSelectableFlags.DontClosePopups, new Vector2(380, 36))) _selectedProvider = "claude";
 
             if (_selectedProvider == "claude")
             {
-                ImGui.SetCursorPos(new Vector2(panelX, panelY + 150));
+                ImGui.SetCursorPos(new Vector2(panelX, panelY + 140));
                 ImGui.InputText("API Key", ref _apiKey, 200);
             }
 
-            ImGui.SetCursorPos(new Vector2(panelX, h - 100));
+            ImGui.SetCursorPos(new Vector2(panelX, h - 120));
             if (ImGui.Button("Start", new Vector2(380, 48)))
             {
                 _config.SetProvider(_selectedProvider);
@@ -143,6 +132,10 @@ public sealed class UIManager
                 Task.Run(TestProvider);
             }
         }
+
+        ImGui.End();
+        ImGui.PopStyleColor();
+        ImGui.PopStyleVar(2);
     }
 
     private void RenderOfficeUI()
