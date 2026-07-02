@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Common.Interfaces;
@@ -65,7 +65,7 @@ public sealed class GenerateAgentCommandHandler : IRequestHandler<GenerateAgentC
         }
 
         var (skills, personality) = TryExtractProfile(result.ExtractedJson ?? result.RawOutput);
-        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title), null, request.Level);
+        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title));
 
         foreach (var skill in skills)
             agent.AssignSkill(new AgentSkill(skill));
@@ -82,7 +82,7 @@ public sealed class GenerateAgentCommandHandler : IRequestHandler<GenerateAgentC
 
     private async Task<AgentId> CreateWithDefaults(GenerateAgentCommand request)
     {
-        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title), null, request.Level);
+        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title));
         agent.AssignSkill(new AgentSkill("Communication"));
         agent.AssignSkill(new AgentSkill("Problem Solving"));
 

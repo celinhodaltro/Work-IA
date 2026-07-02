@@ -1,6 +1,5 @@
 ﻿using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Events;
-using Work_IA.Domain.Agents;
 
 namespace Work_IA.Domain.Agents;
 
@@ -21,6 +20,8 @@ public sealed class Agent : AggregateRoot<AgentId>
     public DateTime JoinedAt { get; private set; }
     public DateTime? LastPromotionAt { get; private set; }
     public DateTime? LastHeartbeat { get; private set; }
+    public bool IsHead { get; private set; }
+    public AgentPermissions Permissions { get; private set; } = new();
 
     public IReadOnlyList<ObservationRule> ObservationRules => _observationRules.AsReadOnly();
     public IReadOnlyList<AgentMessage> Inbox => _inbox.AsReadOnly();
@@ -31,6 +32,8 @@ public sealed class Agent : AggregateRoot<AgentId>
     public string? ConversationTopic { get; set; }
     public AgentId? ConversationPartner { get; set; }
     public AgentPosition Position { get; set; } = new(0, 0, 0);
+
+    public bool CanBeFired => !IsHead;
 
     private Agent() : base(AgentId.New()) { }
 
@@ -46,18 +49,24 @@ public sealed class Agent : AggregateRoot<AgentId>
         JoinedAt = DateTime.UtcNow;
     }
 
-    public static Agent Create(AgentName name, AgentTitle title, RoleId? roleId = null, AgentCareerLevel? level = null)
+    public static Agent Create(AgentName name, AgentTitle title, RoleId? roleId = null, AgentPermissions? permissions = null, bool isHead = false)
     {
-        var agent = new Agent(AgentId.New(), name, title, level ?? AgentCareerLevel.Intern)
-        {
-            Status = AgentStatus.Created,
-            ExperiencePoints = 0,
-            Skills = [],
-            RoleId = roleId,
-            JoinedAt = DateTime.UtcNow
-        };
+        var agent = new Agent(AgentId.New(), name, title, AgentCareerLevel.Intern);
+        agent.Status = AgentStatus.Created;
+        agent.ExperiencePoints = 0;
+        agent.Skills = [];
+        agent.RoleId = roleId;
+        agent.JoinedAt = DateTime.UtcNow;
+        agent.Permissions = permissions ?? new AgentPermissions();
+        agent.IsHead = isHead;
         agent.RaiseDomainEvent(new AgentCreatedDomainEvent(agent.AgentId, name.Value, title.Value));
         return agent;
+    }
+
+    public void SetPermissions(AgentPermissions permissions)
+    {
+        if (IsHead) return;
+        Permissions = permissions;
     }
 
     public void Start()
@@ -83,40 +92,13 @@ public sealed class Agent : AggregateRoot<AgentId>
         RaiseDomainEvent(new AgentStoppedDomainEvent(AgentId));
     }
 
-    public void AssignSkill(AgentSkill skill)
-    {
-        if (!Skills.Any(s => s.Name.Equals(skill.Name, StringComparison.OrdinalIgnoreCase)))
-        {
-            Skills.Add(skill);
-        }
-    }
+    public void UpdateHeartbeat() => LastHeartbeat = DateTime.UtcNow;
 
-    public void AddExperience(int points)
+    public bool CanAssignTaskTo(Agent target)
     {
-        if (points <= 0)
-            throw new ArgumentException("Experience points must be positive", nameof(points));
-        ExperiencePoints += points;
-        RaiseDomainEvent(new ExperienceGainedDomainEvent(AgentId, points, ExperiencePoints));
-    }
-
-    public bool CanPromoteTo(AgentCareerLevel targetLevel, int xpRequired)
-    {
-        return targetLevel > CareerLevel && ExperiencePoints >= xpRequired;
-    }
-
-    public void Promote(AgentTitle newTitle, AgentCareerLevel newLevel)
-    {
-        if (newLevel <= CareerLevel)
-            throw new InvalidOperationException($"Cannot promote to same or lower level. Current: {CareerLevel}, Target: {newLevel}");
-        Title = newTitle;
-        CareerLevel = newLevel;
-        LastPromotionAt = DateTime.UtcNow;
-        RaiseDomainEvent(new AgentPromotedDomainEvent(AgentId, newTitle.Value, newLevel));
-    }
-
-    public void AssignMentor(AgentId mentorId)
-    {
-        MentorId = mentorId;
+        if (!Permissions.CanDelegate) return false;
+        if (target.Permissions.ReportsTo is null) return false;
+        return target.Permissions.ReportsTo == AgentId;
     }
 
     public void AddObservationRule(ObservationRule rule)
@@ -125,9 +107,9 @@ public sealed class Agent : AggregateRoot<AgentId>
         RaiseDomainEvent(new ObservationRuleAddedDomainEvent(AgentId, rule.EventType));
     }
 
-    public bool ShouldObserve(string eventType)
+    public bool ShouldObserve(string eventType, object? eventData = null)
     {
-        return _observationRules.Any(r => r.EventType == eventType);
+        return _observationRules.Any(r => r.EventType == eventType && (r.Condition is null || r.Condition(eventData!)));
     }
 
     public void ReceiveMessage(AgentMessage message)
@@ -136,13 +118,28 @@ public sealed class Agent : AggregateRoot<AgentId>
         RaiseDomainEvent(new MessageReceivedDomainEvent(AgentId, message.From));
     }
 
-    public void UpdateHeartbeat()
+    public void AddExperience(int points)
     {
-        LastHeartbeat = DateTime.UtcNow;
+        ExperiencePoints += points;
     }
 
-    public bool IsOnline => Status == AgentStatus.Running &&
-                            LastHeartbeat.HasValue &&
-                            (DateTime.UtcNow - LastHeartbeat.Value).TotalMinutes < 5;
-}
+    public bool CanPromoteTo(AgentCareerLevel targetLevel, int requiredXp)
+    {
+        return targetLevel > CareerLevel && ExperiencePoints >= requiredXp;
+    }
 
+    public void Promote(AgentTitle newTitle, AgentCareerLevel newLevel)
+    {
+        Title = newTitle;
+        CareerLevel = newLevel;
+        LastPromotionAt = DateTime.UtcNow;
+    }
+
+    public void AssignSkill(AgentSkill skill)
+    {
+        if (!Skills.Any(s => s.Name.Equals(skill.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            Skills.Add(skill);
+        }
+    }
+}

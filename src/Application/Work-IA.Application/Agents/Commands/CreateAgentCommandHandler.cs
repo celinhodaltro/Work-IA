@@ -2,9 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Work_IA.Application.Agents;
 using Work_IA.Application.Common.Interfaces;
+using Work_IA.Domain.Agents;
 using Work_IA.Domain.Abstractions;
-using Work_IA.Domain.Agents;
-using Work_IA.Domain.Agents;
 
 namespace Work_IA.Application.Agents.Commands;
 
@@ -36,8 +35,9 @@ public sealed class CreateAgentCommandHandler : IRequestHandler<CreateAgentComma
     public async Task<AgentId> Handle(CreateAgentCommand request, CancellationToken cancellationToken)
     {
         RoleId? roleId = request.RoleId.HasValue ? RoleId.From(request.RoleId.Value) : null;
-        AgentCareerLevel? level = request.CareerLevel.HasValue ? (AgentCareerLevel)request.CareerLevel.Value : null;
-        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title), roleId, level);
+        AgentId? reportsTo = request.ReportsTo.HasValue ? AgentId.From(request.ReportsTo.Value) : null;
+        var permissions = new AgentPermissions(request.CanRead, request.CanWrite, request.CanDelegate, reportsTo);
+        var agent = Agent.Create(new AgentName(request.Name), new AgentTitle(request.Title), roleId, permissions);
 
         await _repository.AddAsync(agent, cancellationToken);
 

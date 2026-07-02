@@ -37,9 +37,7 @@ public sealed class UIManager : IDisposable
 
     public void Render()
     {
-        ImGuiNET.ImGui.NewFrame();
         RenderUI();
-        ImGuiNET.ImGui.EndFrame();
         _controller?.Render();
     }
 
