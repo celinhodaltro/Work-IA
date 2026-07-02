@@ -6,6 +6,7 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Work_IA.Application;
+using Work_IA.Application.Agents.Commands;
 using Work_IA.Client.Rendering;
 using Work_IA.Infrastructure;
 using Work_IA.Infrastructure.Persistence;
@@ -23,6 +24,7 @@ public static class Program
                 services.AddInfrastructure(ctx.Configuration);
                 services.AddSingleton<AgentStateEventHandler>();
                 services.AddSingleton<OfficeRenderer>();
+                services.AddSingleton<UIManager>();
                 services.AddHostedService<AgentBehaviorService>();
             })
             .Build();
@@ -43,6 +45,7 @@ public static class Program
 
         var window = Window.Create(options);
         var renderer = host.Services.GetRequiredService<OfficeRenderer>();
+        var ui = host.Services.GetRequiredService<UIManager>();
         IInputContext? input = null;
 
         window.Load += () =>
@@ -50,19 +53,23 @@ public static class Program
             var gl = GL.GetApi(window);
             renderer.Initialize(gl, window.Size);
             input = window.CreateInput();
+            ui.Initialize(gl, window);
         };
 
         window.Update += (delta) =>
         {
             if (input is not null) renderer.HandleInput(input);
             renderer.Update((float)delta);
+            ui.Update((float)delta);
         };
 
-        window.Render += (_) => renderer.Render();
+        window.Render += (_) => { renderer.Render(); ui.Render(); };
+
         window.Resize += (size) => renderer.Resize(size);
 
         window.Run();
         input?.Dispose();
+        ui.Dispose();
         await host.StopAsync();
     }
 }
