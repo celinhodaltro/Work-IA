@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Work_IA.Application.Common.Interfaces;
 using Work_IA.Domain.Abstractions;
 using Work_IA.Domain.Agents;
 
@@ -36,6 +37,32 @@ public sealed class RoleSeedService : IHostedService
         }
 
         _logger.LogInformation("Seeded {Count} roles successfully", roles.Count);
+
+        await SeedHeadAgentAsync(scope, cancellationToken);
+    }
+
+    private async Task SeedHeadAgentAsync(IServiceScope scope, CancellationToken ct)
+    {
+        var agentRepo = scope.ServiceProvider.GetRequiredService<IAgentRepository>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+        var existing = await agentRepo.GetAllAsync(ct);
+        if (existing.Any(a => a.IsHead))
+        {
+            _logger.LogInformation("Head agent already exists");
+            return;
+        }
+
+        var headAgent = Agent.Create(
+            new AgentName("Head of Engineering"),
+            new AgentTitle("Head of Engineering"),
+            null,
+            new AgentPermissions(false, false, true, null),
+            true);
+
+        await agentRepo.AddAsync(headAgent, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+        _logger.LogInformation("Head agent created");
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
